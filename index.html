@@ -92,24 +92,13 @@
     .login-logo {
       text-align: center;
       margin-bottom: 30px;
-      padding: 20px;
-      background: linear-gradient(135deg, #1a3a6d, #2c3e50);
-      border-radius: 10px;
-      color: white;
     }
 
     .login-logo img {
       max-width: 100%;
       height: auto;
-      max-height: 100px;
+      max-height: 120px;
       margin-bottom: 10px;
-    }
-
-    .login-logo .logo-text {
-      font-size: 14px;
-      color: #f9c642;
-      margin-top: 10px;
-      font-style: italic;
     }
 
     .login-form .form-group {
@@ -208,46 +197,23 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
     }
   
     .header-logo-container {
       display: flex;
       align-items: center;
       gap: 20px;
+      flex-wrap: wrap;
     }
     
-    .poste-logo {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: linear-gradient(135deg, #1a3a6d, #2c3e50);
-      padding: 10px 20px;
+    .header-logo-container img {
+      height: 60px;
+      width: auto;
+      background-color: white;
+      padding: 5px;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    
-    .poste-logo-main {
-      font-size: 24px;
-      font-weight: bold;
-      color: #f9c642;
-      line-height: 1.2;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-    
-    .poste-logo-sub {
-      font-size: 18px;
-      color: white;
-      margin-top: 2px;
-      font-weight: 500;
-    }
-    
-    .poste-logo-slogan {
-      font-size: 12px;
-      color: #ecf0f1;
-      margin-top: 5px;
-      font-style: italic;
-      letter-spacing: 1px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     .app-header h1 {
@@ -288,6 +254,7 @@
       display: flex;
       gap: 5px;
       margin-right: 15px;
+      flex-wrap: wrap;
     }
 
     .nav-tab {
@@ -900,16 +867,16 @@
       .header-logo-container {
         flex-direction: column;
         text-align: center;
+        justify-content: center;
       }
       
-      .poste-logo {
+      .header-logo-container img {
         margin-bottom: 10px;
       }
       
       .header-actions {
         width: 100%;
         justify-content: center;
-        flex-wrap: wrap;
       }
       
       .form-grid {
@@ -944,19 +911,6 @@
       .nav-tabs {
         margin-right: 0;
         margin-bottom: 10px;
-        flex-wrap: wrap;
-      }
-      
-      .poste-logo-main {
-        font-size: 20px;
-      }
-      
-      .poste-logo-sub {
-        font-size: 16px;
-      }
-      
-      .poste-logo-slogan {
-        font-size: 10px;
       }
     }
   </style>
@@ -966,13 +920,8 @@
   <div id="login-container" class="login-container">
     <div class="login-box">
       <div class="login-logo">
-        <!-- Logo de La Poste Guinéenne pour la page de connexion -->
-        <img src="https://raw.githubusercontent.com/votre-username/votre-repo/main/Capture%20d'%C3%A9cran%202025-09-17%20142216.png" alt="Logo La Poste Guinéenne" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <div class="logo-text" style="display: none;">
-          <div class="poste-logo-main">LA POSTE</div>
-          <div class="poste-logo-sub">GUINÉENNE</div>
-          <div class="poste-logo-slogan">Confiance - Innovation - Proximité</div>
-        </div>
+        <img src="https://raw.githubusercontent.com/Gestion-Flotte/FLOTTE-PGSA/076b2f3e4efe2a0f42e52718219afd5d0cb8e969/logo.png" 
+             alt="Logo La Poste Guinéenne">
       </div>
       <h2><i class="fas fa-lock"></i> Connexion</h2>
       <form id="login-form" class="login-form">
@@ -1034,13 +983,8 @@
     <header class="app-header">
       <div class="container">
         <div class="header-logo-container">
-          <!-- Logo de La Poste Guinéenne pour l'en-tête -->
-          <div class="poste-logo">
-            <img src="https://raw.githubusercontent.com/votre-username/votre-repo/main/Capture%20d'%C3%A9cran%202025-09-17%20142216.png" alt="Logo La Poste Guinéenne" style="max-height: 40px; width: auto; margin-bottom: 5px;" onerror="this.style.display='none'; this.parentElement.innerHTML = '<div class=\'poste-logo-main\'>LA POSTE</div><div class=\'poste-logo-sub\'>GUINÉENNE</div><div class=\'poste-logo-slogan\'>Confiance - Innovation - Proximité</div>';">
-            <div class="poste-logo-main">LA POSTE</div>
-            <div class="poste-logo-sub">GUINÉENNE</div>
-            <div class="poste-logo-slogan">Confiance - Innovation - Proximité</div>
-          </div>
+          <img src="https://raw.githubusercontent.com/Gestion-Flotte/FLOTTE-PGSA/076b2f3e4efe2a0f42e52718219afd5d0cb8e969/logo.png" 
+               alt="Logo La Poste Guinéenne">
           <h1><i class="fas fa-truck-moving"></i> Gestion des Flottes</h1>
         </div>
         <div class="header-actions">
@@ -1988,7 +1932,7 @@
       e.preventDefault();
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
-      const remember = false; // Pourrait être ajouté avec une checkbox
+      const remember = false;
       const errorElement = document.getElementById('login-error');
 
       if (passwordManager.validateUser(username, password)) {
@@ -2407,7 +2351,7 @@
       renderGeneratorHistory();
     }
 
-    // Fonctions de rendu (à compléter avec le code existant)
+    // Fonctions de rendu
     function renderVehiclesList() {
       const container = document.getElementById('liste-vehicules');
       if (!container) return;
