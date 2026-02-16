@@ -89,26 +89,27 @@
       color: white;
     }
 
-    .login-box .logo-text {
+    .login-logo {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a3a6d, #2c3e50);
+      border-radius: 10px;
+      color: white;
     }
 
-    .login-box .logo-main {
-      font-size: 24px;
-      font-weight: bold;
-      color: #1a3a6d;
+    .login-logo img {
+      max-width: 100%;
+      height: auto;
+      max-height: 100px;
+      margin-bottom: 10px;
     }
 
-    .login-box .logo-sub {
-      font-size: 18px;
-      color: #666;
-    }
-
-    .login-box .logo-slogan {
+    .login-logo .logo-text {
       font-size: 14px;
       color: #f9c642;
-      margin-top: 5px;
+      margin-top: 10px;
+      font-style: italic;
     }
 
     .login-form .form-group {
@@ -186,6 +187,15 @@
       background-color: #c0392b !important;
     }
 
+    .change-password-btn {
+      background-color: var(--warning-color) !important;
+      color: white !important;
+    }
+
+    .change-password-btn:hover {
+      background-color: #e67e22 !important;
+    }
+
     .app-header {
       background-color: var(--dark-color);
       color: white;
@@ -203,39 +213,41 @@
     .header-logo-container {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 20px;
     }
     
-    .header-logo {
-      height: 50px;
+    .poste-logo {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      background-color: #1a3a6d;
-      padding: 0 15px;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, #1a3a6d, #2c3e50);
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     
-    .logo-text {
-      text-align: center;
-      line-height: 1.2;
+    .poste-logo-main {
+      font-size: 24px;
       font-weight: bold;
-      color: white;
-    }
-    
-    .logo-main {
-      font-size: 18px;
-      text-transform: uppercase;
-    }
-    
-    .logo-sub {
-      font-size: 14px;
-    }
-    
-    .logo-slogan {
-      font-size: 10px;
       color: #f9c642;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .poste-logo-sub {
+      font-size: 18px;
+      color: white;
       margin-top: 2px;
+      font-weight: 500;
+    }
+    
+    .poste-logo-slogan {
+      font-size: 12px;
+      color: #ecf0f1;
+      margin-top: 5px;
+      font-style: italic;
+      letter-spacing: 1px;
     }
 
     .app-header h1 {
@@ -244,11 +256,32 @@
       align-items: center;
       gap: 10px;
       margin: 0;
+      color: white;
     }
 
     .header-actions {
       display: flex;
       gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(255,255,255,0.1);
+      padding: 5px 12px;
+      border-radius: 20px;
+    }
+
+    .user-info i {
+      font-size: 16px;
+    }
+
+    .user-info span {
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .nav-tabs {
@@ -431,6 +464,15 @@
       background-color: #27ae60;
     }
 
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background-color: #e67e22;
+    }
+
     .btn-outline {
       background: transparent;
       border: 1px solid var(--border-color);
@@ -567,7 +609,7 @@
       background-color: white;
       border-radius: 8px;
       width: 90%;
-      max-width: 600px;
+      max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -586,6 +628,12 @@
       align-items: center;
     }
 
+    .modal-header h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .modal-body {
       padding: 20px;
     }
@@ -594,6 +642,7 @@
       padding: 15px 20px;
       display: flex;
       justify-content: flex-end;
+      gap: 10px;
       border-top: 1px solid var(--border-color);
     }
 
@@ -631,6 +680,10 @@
 
     .toast.error {
       background-color: var(--danger-color);
+    }
+
+    .toast.warning {
+      background-color: var(--warning-color);
     }
 
     .bike-status {
@@ -795,6 +848,41 @@
       color: #fff8e1;
     }
 
+    .password-strength {
+      margin-top: 5px;
+      height: 5px;
+      background-color: #ddd;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s, background-color 0.3s;
+    }
+
+    .password-strength-bar.weak {
+      width: 33.33%;
+      background-color: #e74c3c;
+    }
+
+    .password-strength-bar.medium {
+      width: 66.66%;
+      background-color: #f39c12;
+    }
+
+    .password-strength-bar.strong {
+      width: 100%;
+      background-color: #2ecc71;
+    }
+
+    .password-requirements {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 5px;
+    }
+
     .mb-3 { margin-bottom: 1rem; }
     .mt-3 { margin-top: 1rem; }
     .text-center { text-align: center; }
@@ -814,13 +902,14 @@
         text-align: center;
       }
       
-      .header-logo {
+      .poste-logo {
         margin-bottom: 10px;
       }
       
       .header-actions {
         width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
       }
       
       .form-grid {
@@ -855,47 +944,87 @@
       .nav-tabs {
         margin-right: 0;
         margin-bottom: 10px;
+        flex-wrap: wrap;
       }
       
-      .header-logo {
-        height: 40px;
-        padding: 0 10px;
+      .poste-logo-main {
+        font-size: 20px;
       }
       
-      .logo-main {
+      .poste-logo-sub {
         font-size: 16px;
       }
       
-      .logo-sub {
-        font-size: 12px;
-      }
-      
-      .logo-slogan {
-        font-size: 9px;
+      .poste-logo-slogan {
+        font-size: 10px;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Écran de connexion -->
+  <!-- Écran de connexion avec logo -->
   <div id="login-container" class="login-container">
     <div class="login-box">
-      <div class="logo-text">
-        <div class="logo-main">LA POSTE</div>
-        <div class="logo-sub">GUINÉENNE</div>
-        <div class="logo-slogan">Confiance - Innovation - Proximité</div>
+      <div class="login-logo">
+        <!-- Logo de La Poste Guinéenne pour la page de connexion -->
+        <img src="https://raw.githubusercontent.com/votre-username/votre-repo/main/Capture%20d'%C3%A9cran%202025-09-17%20142216.png" alt="Logo La Poste Guinéenne" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div class="logo-text" style="display: none;">
+          <div class="poste-logo-main">LA POSTE</div>
+          <div class="poste-logo-sub">GUINÉENNE</div>
+          <div class="poste-logo-slogan">Confiance - Innovation - Proximité</div>
+        </div>
       </div>
       <h2><i class="fas fa-lock"></i> Connexion</h2>
       <form id="login-form" class="login-form">
         <div class="form-group">
+          <label for="username">Nom d'utilisateur</label>
+          <input type="text" id="username" placeholder="Entrez votre nom d'utilisateur" required>
+        </div>
+        <div class="form-group">
           <label for="password">Mot de passe</label>
-          <input type="password" id="password" placeholder="Entrez le mot de passe" required>
+          <input type="password" id="password" placeholder="Entrez votre mot de passe" required>
         </div>
         <button type="submit">Se connecter</button>
         <div id="login-error" class="login-error"></div>
       </form>
       <div class="login-info">
-        <i class="fas fa-info-circle"></i> Pour accéder à l'application, entrez le mot de passe
+        <i class="fas fa-info-circle"></i> Utilisateurs par défaut : admin / admin123
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de changement de mot de passe -->
+  <div id="change-password-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-key"></i> Changer le mot de passe</h3>
+        <button class="close-modal" id="close-password-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="change-password-form">
+          <div class="form-group">
+            <label for="current-password">Mot de passe actuel</label>
+            <input type="password" id="current-password" required>
+          </div>
+          <div class="form-group">
+            <label for="new-password">Nouveau mot de passe</label>
+            <input type="password" id="new-password" required>
+            <div class="password-strength">
+              <div id="password-strength-bar" class="password-strength-bar"></div>
+            </div>
+            <div class="password-requirements" id="password-requirements">
+              Le mot de passe doit contenir au moins 8 caractères
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirmer le nouveau mot de passe</label>
+            <input type="password" id="confirm-password" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancel-password-change">Annuler</button>
+        <button class="btn btn-primary" id="save-password-change">Changer le mot de passe</button>
       </div>
     </div>
   </div>
@@ -905,16 +1034,20 @@
     <header class="app-header">
       <div class="container">
         <div class="header-logo-container">
-          <div class="header-logo">
-            <div class="logo-text">
-              <div class="logo-main">LA POSTE</div>
-              <div class="logo-sub">GUINÉENNE</div>
-              <div class="logo-slogan">Confiance - Innovation - Proximité</div>
-            </div>
+          <!-- Logo de La Poste Guinéenne pour l'en-tête -->
+          <div class="poste-logo">
+            <img src="https://raw.githubusercontent.com/votre-username/votre-repo/main/Capture%20d'%C3%A9cran%202025-09-17%20142216.png" alt="Logo La Poste Guinéenne" style="max-height: 40px; width: auto; margin-bottom: 5px;" onerror="this.style.display='none'; this.parentElement.innerHTML = '<div class=\'poste-logo-main\'>LA POSTE</div><div class=\'poste-logo-sub\'>GUINÉENNE</div><div class=\'poste-logo-slogan\'>Confiance - Innovation - Proximité</div>';">
+            <div class="poste-logo-main">LA POSTE</div>
+            <div class="poste-logo-sub">GUINÉENNE</div>
+            <div class="poste-logo-slogan">Confiance - Innovation - Proximité</div>
           </div>
           <h1><i class="fas fa-truck-moving"></i> Gestion des Flottes</h1>
         </div>
         <div class="header-actions">
+          <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="current-user">Admin</span>
+          </div>
           <div class="nav-tabs">
             <button class="nav-tab active" data-tab="vehicles"><i class="fas fa-car"></i> Véhicules</button>
             <button class="nav-tab" data-tab="bikes"><i class="fas fa-bicycle"></i> Motos</button>
@@ -922,6 +1055,7 @@
           </div>
           <button id="export-excel" class="btn btn-primary"><i class="fas fa-file-excel"></i> Exporter Excel</button>
           <button id="import-excel" class="btn btn-secondary"><i class="fas fa-file-import"></i> Importer</button>
+          <button id="change-password" class="btn btn-warning change-password-btn"><i class="fas fa-key"></i> Changer MDP</button>
           <button id="logout-btn" class="btn btn-danger logout-btn"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
           <button id="toggle-theme" class="btn btn-secondary"><i class="fas fa-moon"></i></button>
         </div>
@@ -1772,15 +1906,77 @@
 
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
-    // Configuration du mot de passe (vous pouvez le changer ici)
-    const APP_PASSWORD = "poste2025"; // Changez ce mot de passe selon vos besoins
+    // Gestionnaire de mots de passe (stockés dans localStorage)
+    class PasswordManager {
+      constructor() {
+        this.defaultUsers = {
+          'admin': 'admin123',
+          'gestionnaire': 'gestion123',
+          'facteur': 'facteur123'
+        };
+        this.loadPasswords();
+      }
+
+      loadPasswords() {
+        const saved = localStorage.getItem('fleet_passwords');
+        if (saved) {
+          this.users = JSON.parse(saved);
+        } else {
+          this.users = { ...this.defaultUsers };
+          this.savePasswords();
+        }
+      }
+
+      savePasswords() {
+        localStorage.setItem('fleet_passwords', JSON.stringify(this.users));
+      }
+
+      validateUser(username, password) {
+        return this.users[username] && this.users[username] === password;
+      }
+
+      changePassword(username, oldPassword, newPassword) {
+        if (!this.users[username]) {
+          return { success: false, message: 'Utilisateur non trouvé' };
+        }
+        
+        if (this.users[username] !== oldPassword) {
+          return { success: false, message: 'Mot de passe actuel incorrect' };
+        }
+        
+        if (newPassword.length < 8) {
+          return { success: false, message: 'Le nouveau mot de passe doit contenir au moins 8 caractères' };
+        }
+        
+        this.users[username] = newPassword;
+        this.savePasswords();
+        return { success: true, message: 'Mot de passe changé avec succès' };
+      }
+
+      resetToDefault() {
+        this.users = { ...this.defaultUsers };
+        this.savePasswords();
+      }
+
+      getUsername() {
+        return sessionStorage.getItem('fleet_username') || localStorage.getItem('fleet_username');
+      }
+    }
+
+    const passwordManager = new PasswordManager();
+    let currentUser = null;
 
     // Vérifier si l'utilisateur est déjà connecté
     function checkAuth() {
-      const isAuthenticated = sessionStorage.getItem('fleetAuth') === 'true';
-      if (isAuthenticated) {
+      const isAuthenticated = sessionStorage.getItem('fleetAuth') === 'true' || localStorage.getItem('fleetAuth') === 'true';
+      const username = sessionStorage.getItem('fleet_username') || localStorage.getItem('fleet_username');
+      
+      if (isAuthenticated && username) {
+        currentUser = username;
+        document.getElementById('current-user').textContent = username;
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('main-app').classList.add('visible');
+        initApp();
       } else {
         document.getElementById('login-container').style.display = 'flex';
         document.getElementById('main-app').classList.remove('visible');
@@ -1790,29 +1986,109 @@
     // Gestionnaire de connexion
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
+      const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
+      const remember = false; // Pourrait être ajouté avec une checkbox
       const errorElement = document.getElementById('login-error');
 
-      if (password === APP_PASSWORD) {
-        sessionStorage.setItem('fleetAuth', 'true');
+      if (passwordManager.validateUser(username, password)) {
+        currentUser = username;
+        
+        if (remember) {
+          localStorage.setItem('fleetAuth', 'true');
+          localStorage.setItem('fleet_username', username);
+        } else {
+          sessionStorage.setItem('fleetAuth', 'true');
+          sessionStorage.setItem('fleet_username', username);
+        }
+        
+        document.getElementById('current-user').textContent = username;
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('main-app').classList.add('visible');
         errorElement.textContent = '';
         document.getElementById('password').value = '';
+        document.getElementById('username').value = '';
         
-        // Initialiser l'application après connexion
+        showToast(`Bienvenue ${username} !`, 'success');
         initApp();
       } else {
-        errorElement.textContent = 'Mot de passe incorrect';
+        errorElement.textContent = 'Nom d\'utilisateur ou mot de passe incorrect';
       }
     });
 
     // Gestionnaire de déconnexion
     document.getElementById('logout-btn').addEventListener('click', function() {
+      localStorage.removeItem('fleetAuth');
+      localStorage.removeItem('fleet_username');
       sessionStorage.removeItem('fleetAuth');
+      sessionStorage.removeItem('fleet_username');
+      currentUser = null;
+      
       document.getElementById('login-container').style.display = 'flex';
       document.getElementById('main-app').classList.remove('visible');
       showToast('Déconnexion réussie', 'success');
+    });
+
+    // Gestionnaire de changement de mot de passe
+    document.getElementById('change-password').addEventListener('click', function() {
+      document.getElementById('change-password-modal').classList.add('show');
+      document.getElementById('current-password').value = '';
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-password').value = '';
+      document.getElementById('password-strength-bar').className = 'password-strength-bar';
+    });
+
+    document.getElementById('close-password-modal').addEventListener('click', function() {
+      document.getElementById('change-password-modal').classList.remove('show');
+    });
+
+    document.getElementById('cancel-password-change').addEventListener('click', function() {
+      document.getElementById('change-password-modal').classList.remove('show');
+    });
+
+    // Validation du mot de passe en temps réel
+    document.getElementById('new-password').addEventListener('input', function() {
+      const password = this.value;
+      const strengthBar = document.getElementById('password-strength-bar');
+      const requirements = document.getElementById('password-requirements');
+      
+      if (password.length >= 8) {
+        if (password.length >= 12 && /[!@#$%^&*]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+          strengthBar.className = 'password-strength-bar strong';
+          requirements.textContent = 'Mot de passe fort';
+        } else if (password.length >= 8) {
+          strengthBar.className = 'password-strength-bar medium';
+          requirements.textContent = 'Mot de passe moyen';
+        }
+      } else {
+        strengthBar.className = 'password-strength-bar weak';
+        requirements.textContent = 'Le mot de passe doit contenir au moins 8 caractères';
+      }
+    });
+
+    document.getElementById('save-password-change').addEventListener('click', function() {
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      if (!currentUser) {
+        showToast('Erreur: utilisateur non connecté', 'error');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showToast('Les nouveaux mots de passe ne correspondent pas', 'error');
+        return;
+      }
+
+      const result = passwordManager.changePassword(currentUser, currentPassword, newPassword);
+      
+      if (result.success) {
+        showToast(result.message, 'success');
+        document.getElementById('change-password-modal').classList.remove('show');
+      } else {
+        showToast(result.message, 'error');
+      }
     });
 
     // Gestionnaire de base de données locale (IndexedDB)
@@ -2131,7 +2407,7 @@
       renderGeneratorHistory();
     }
 
-    // Fonctions de rendu
+    // Fonctions de rendu (à compléter avec le code existant)
     function renderVehiclesList() {
       const container = document.getElementById('liste-vehicules');
       if (!container) return;
@@ -3860,11 +4136,6 @@
 
     // Vérifier l'authentification au chargement
     checkAuth();
-
-    // Si l'utilisateur est déjà connecté, initialiser l'application
-    if (sessionStorage.getItem('fleetAuth') === 'true') {
-      document.addEventListener('DOMContentLoaded', initApp);
-    }
   </script>
 </body>
 </html>
