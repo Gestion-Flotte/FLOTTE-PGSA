@@ -98,7 +98,6 @@
       max-width: 100%;
       height: auto;
       max-height: 120px;
-      margin-bottom: 10px;
     }
 
     .login-form .form-group {
@@ -183,6 +182,30 @@
 
     .change-password-btn:hover {
       background-color: #e67e22 !important;
+    }
+
+    .user-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .user-badge.admin {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .user-badge.gestionnaire {
+      background-color: #3498db;
+      color: white;
+    }
+
+    .user-badge.utilisateur {
+      background-color: #2ecc71;
+      color: white;
     }
 
     .app-header {
@@ -369,6 +392,13 @@
       resize: vertical;
     }
 
+    .form-group input:disabled,
+    .form-group select:disabled,
+    .form-group textarea:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .full-width {
       grid-column: 1 / -1;
     }
@@ -453,6 +483,20 @@
     .btn-sm {
       padding: 6px 12px;
       font-size: 0.8rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-success {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
     }
 
     .table-responsive {
@@ -850,6 +894,62 @@
       margin-top: 5px;
     }
 
+    .admin-section {
+      border-top: 2px solid var(--primary-color);
+      margin-top: 30px;
+      padding-top: 20px;
+    }
+
+    .user-management {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .user-card {
+      background-color: var(--light-color);
+      border-radius: 8px;
+      padding: 15px;
+      position: relative;
+    }
+
+    .user-card .user-role {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    .user-card.admin .user-role {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .user-card.gestionnaire .user-role {
+      background-color: #3498db;
+      color: white;
+    }
+
+    .user-card.utilisateur .user-role {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .user-card h4 {
+      margin-bottom: 10px;
+      padding-right: 60px;
+    }
+
+    .user-card .user-actions {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
     .mb-3 { margin-bottom: 1rem; }
     .mt-3 { margin-top: 1rem; }
     .text-center { text-align: center; }
@@ -933,11 +1033,19 @@
           <label for="password">Mot de passe</label>
           <input type="password" id="password" placeholder="Entrez votre mot de passe" required>
         </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="remember-me"> Se souvenir de moi
+          </label>
+        </div>
         <button type="submit">Se connecter</button>
         <div id="login-error" class="login-error"></div>
       </form>
       <div class="login-info">
-        <i class="fas fa-info-circle"></i> Utilisateurs par défaut : admin / admin123
+        <i class="fas fa-info-circle"></i> 
+        <strong>Administrateur:</strong> admin / Admin@123<br>
+        <strong>Gestionnaire:</strong> gestionnaire / Gestion@123<br>
+        <strong>Utilisateur:</strong> utilisateur / Utilisateur@123
       </div>
     </div>
   </div>
@@ -962,7 +1070,7 @@
               <div id="password-strength-bar" class="password-strength-bar"></div>
             </div>
             <div class="password-requirements" id="password-requirements">
-              Le mot de passe doit contenir au moins 8 caractères
+              Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial
             </div>
           </div>
           <div class="form-group">
@@ -974,6 +1082,143 @@
       <div class="modal-footer">
         <button class="btn btn-outline" id="cancel-password-change">Annuler</button>
         <button class="btn btn-primary" id="save-password-change">Changer le mot de passe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de gestion des utilisateurs (Admin uniquement) -->
+  <div id="user-management-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-users-cog"></i> Gestion des Utilisateurs</h3>
+        <button class="close-modal" id="close-user-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="add-user-form" class="mb-3">
+          <h4>Ajouter un utilisateur</h4>
+          <div class="form-group">
+            <label for="new-username">Nom d'utilisateur</label>
+            <input type="text" id="new-username" required>
+          </div>
+          <div class="form-group">
+            <label for="new-password">Mot de passe initial</label>
+            <input type="text" id="new-password" value="Temp@123" readonly>
+            <small style="color: var(--text-light);">L'utilisateur changera son mot de passe à la première connexion</small>
+          </div>
+          <div class="form-group">
+            <label for="new-role">Rôle</label>
+            <select id="new-role" required>
+              <option value="">Sélectionner...</option>
+              <option value="admin">Administrateur</option>
+              <option value="gestionnaire">Gestionnaire</option>
+              <option value="utilisateur">Utilisateur</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="new-fullname">Nom complet</label>
+            <input type="text" id="new-fullname" required>
+          </div>
+          <div class="form-group">
+            <label for="new-email">Email</label>
+            <input type="email" id="new-email" required>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Ajouter l'utilisateur</button>
+        </form>
+
+        <h4>Utilisateurs existants</h4>
+        <div id="users-list" class="user-management">
+          <!-- Les utilisateurs seront chargés dynamiquement -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="close-user-modal-btn">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour afficher les identifiants du nouvel utilisateur (MODIFIÉ) -->
+  <div id="user-credentials-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: var(--secondary-color);">
+        <h3><i class="fas fa-user-plus"></i> Identifiants du nouvel utilisateur</h3>
+        <button class="close-modal" id="close-credentials-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>L'utilisateur a été créé avec succès. Voici ses identifiants de connexion :</p>
+        <div style="background-color: var(--light-color); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left;">
+          <p style="margin-bottom: 15px;">
+            <i class="fas fa-user" style="color: var(--primary-color); width: 25px;"></i>
+            <strong>Nom d'utilisateur :</strong> 
+            <span id="new-username-display" style="font-family: monospace; font-size: 1.1rem; background-color: #f0f0f0; padding: 3px 8px; border-radius: 4px;"></span>
+          </p>
+          <p style="margin-bottom: 15px;">
+            <i class="fas fa-key" style="color: var(--warning-color); width: 25px;"></i>
+            <strong>Mot de passe :</strong> 
+            <span id="new-password-display" style="font-family: monospace; font-size: 1.1rem; background-color: #f0f0f0; padding: 3px 8px; border-radius: 4px;"></span>
+          </p>
+          <p style="margin-bottom: 15px;">
+            <i class="fas fa-id-card" style="color: var(--secondary-color); width: 25px;"></i>
+            <strong>Rôle :</strong> 
+            <span id="new-role-display"></span>
+          </p>
+          <p>
+            <i class="fas fa-envelope" style="color: var(--primary-color); width: 25px;"></i>
+            <strong>Email :</strong> 
+            <span id="new-email-display"></span>
+          </p>
+        </div>
+        <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 4px; margin-top: 15px;">
+          <i class="fas fa-check-circle"></i>
+          <strong>Message de bienvenue :</strong>
+          <p style="margin-top: 10px; font-style: italic; font-weight: bold;">"BIENVENU SUR L'APPLICATION GESTION DE FLOTTE DE LA POSTE GUINÉENNE !"</p>
+        </div>
+        <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; margin-top: 15px;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Important :</strong> L'utilisateur devra changer son mot de passe à la première connexion.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="send-credentials-email-btn"><i class="fas fa-envelope"></i> Envoyer par email</button>
+        <button class="btn btn-secondary" id="copy-credentials-btn"><i class="fas fa-copy"></i> Copier</button>
+        <button class="btn btn-primary" id="print-credentials-btn"><i class="fas fa-print"></i> Imprimer</button>
+        <button class="btn btn-outline" id="close-credentials-btn">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour le lien de connexion -->
+  <div id="login-link-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: var(--primary-color);">
+        <h3><i class="fas fa-link"></i> Lien de connexion généré</h3>
+        <button class="close-modal" id="close-link-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background-color: #e3f2fd; color: #1565c0; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+          <i class="fas fa-info-circle"></i>
+          <strong>Message de sécurité :</strong>
+          <p style="margin-top: 10px; font-style: italic;">"Vous venez d'effectuer une demande de connexion sur l'application de Gestion de Flotte de la Poste Guinéenne"</p>
+        </div>
+        
+        <p>Un lien de connexion sécurisé a été généré pour <strong id="link-username-display"></strong> :</p>
+        
+        <div style="background-color: var(--light-color); padding: 15px; border-radius: 4px; margin: 15px 0;">
+          <p style="margin-bottom: 10px;"><i class="fas fa-link"></i> <strong>Lien de connexion :</strong></p>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="login-link-display" readonly style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-family: monospace; background-color: white;">
+            <button class="btn btn-primary" id="copy-link-btn"><i class="fas fa-copy"></i></button>
+          </div>
+        </div>
+        
+        <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 4px;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Important :</strong> Ce lien est valable 24 heures et expire après utilisation ou à la date d'expiration.
+          <p style="margin-top: 10px; font-size: 0.9rem;">Date d'expiration : <span id="link-expiry-date"></span></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="send-link-btn"><i class="fas fa-envelope"></i> Envoyer par email</button>
+        <button class="btn btn-outline" id="close-link-btn">Fermer</button>
       </div>
     </div>
   </div>
@@ -991,12 +1236,14 @@
           <div class="user-info">
             <i class="fas fa-user-circle"></i>
             <span id="current-user">Admin</span>
+            <span id="user-role-badge" class="user-badge">Admin</span>
           </div>
           <div class="nav-tabs">
             <button class="nav-tab active" data-tab="vehicles"><i class="fas fa-car"></i> Véhicules</button>
             <button class="nav-tab" data-tab="bikes"><i class="fas fa-bicycle"></i> Motos</button>
             <button class="nav-tab" data-tab="generators"><i class="fas fa-bolt"></i> Groupes Électrogènes</button>
           </div>
+          <button id="manage-users" class="btn btn-primary" style="display: none;"><i class="fas fa-users"></i> Utilisateurs</button>
           <button id="export-excel" class="btn btn-primary"><i class="fas fa-file-excel"></i> Exporter Excel</button>
           <button id="import-excel" class="btn btn-secondary"><i class="fas fa-file-import"></i> Importer</button>
           <button id="change-password" class="btn btn-warning change-password-btn"><i class="fas fa-key"></i> Changer MDP</button>
@@ -1067,7 +1314,7 @@
                 
                 <div class="form-group">
                   <label for="chauffeur">Chauffeur</label>
-                  <input type="text" id="chauffeur" placeholder="Nom et prénom du facteur" />
+                  <input type="text" id="chauffeur" placeholder="Nom et prénom" />
                 </div>
                 
                 <div class="form-group full-width">
@@ -1362,8 +1609,8 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="bike_chauffeur">Facteur assigné</label>
-                  <input type="text" id="bike_chauffeur" placeholder="Nom et prénom du facteur" />
+                  <label for="bike_chauffeur">Conducteur</label>
+                  <input type="text" id="bike_chauffeur" placeholder="Nom et prénom" />
                 </div>
                 
                 <div class="form-group full-width">
@@ -1850,80 +2097,511 @@
 
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
-    // Gestionnaire de mots de passe (stockés dans localStorage)
-    class PasswordManager {
+    // Classe de gestion des utilisateurs avec rôles
+    class UserManager {
       constructor() {
-        this.defaultUsers = {
-          'admin': 'admin123',
-          'gestionnaire': 'gestion123',
-          'facteur': 'facteur123'
-        };
-        this.loadPasswords();
+        this.defaultUsers = [
+          {
+            username: 'admin',
+            password: 'Admin@123',
+            role: 'admin',
+            fullname: 'Administrateur Système',
+            email: 'admin@poste.gn',
+            mustChangePassword: false,
+            created_at: new Date().toISOString(),
+            last_login: null
+          },
+          {
+            username: 'gestionnaire',
+            password: 'Gestion@123',
+            role: 'gestionnaire',
+            fullname: 'Gestionnaire de Flotte',
+            email: 'gestionnaire@poste.gn',
+            mustChangePassword: false,
+            created_at: new Date().toISOString(),
+            last_login: null
+          },
+          {
+            username: 'utilisateur',
+            password: 'Utilisateur@123',
+            role: 'utilisateur',
+            fullname: 'Utilisateur Standard',
+            email: 'utilisateur@poste.gn',
+            mustChangePassword: false,
+            created_at: new Date().toISOString(),
+            last_login: null
+          }
+        ];
+        this.users = [];
+        this.loadUsers();
       }
 
-      loadPasswords() {
-        const saved = localStorage.getItem('fleet_passwords');
+      loadUsers() {
+        const saved = localStorage.getItem('fleet_users');
         if (saved) {
-          this.users = JSON.parse(saved);
+          try {
+            this.users = JSON.parse(saved);
+          } catch {
+            this.users = [...this.defaultUsers];
+          }
         } else {
-          this.users = { ...this.defaultUsers };
-          this.savePasswords();
+          this.users = [...this.defaultUsers];
         }
+        this.saveUsers();
       }
 
-      savePasswords() {
-        localStorage.setItem('fleet_passwords', JSON.stringify(this.users));
+      saveUsers() {
+        localStorage.setItem('fleet_users', JSON.stringify(this.users));
+      }
+
+      generateSecurePassword() {
+        const length = 12;
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let password = "";
+        for (let i = 0; i < length; i++) {
+          const randomIndex = Math.floor(Math.random() * charset.length);
+          password += charset[randomIndex];
+        }
+        // S'assurer que le mot de passe contient au moins un caractère de chaque type
+        if (!/[A-Z]/.test(password)) password = "A" + password.slice(1);
+        if (!/[a-z]/.test(password)) password = "a" + password.slice(1);
+        if (!/[0-9]/.test(password)) password = "1" + password.slice(1);
+        if (!/[!@#$%^&*]/.test(password)) password = "!" + password.slice(1);
+        return password;
       }
 
       validateUser(username, password) {
-        return this.users[username] && this.users[username] === password;
+        const user = this.users.find(u => u.username === username);
+        if (user && user.password === password) {
+          // Mettre à jour la dernière connexion
+          user.last_login = new Date().toISOString();
+          this.saveUsers();
+          return { success: true, user: { ...user, password: undefined } };
+        }
+        return { success: false, message: 'Nom d\'utilisateur ou mot de passe incorrect' };
       }
 
       changePassword(username, oldPassword, newPassword) {
-        if (!this.users[username]) {
+        const user = this.users.find(u => u.username === username);
+        
+        if (!user) {
           return { success: false, message: 'Utilisateur non trouvé' };
         }
         
-        if (this.users[username] !== oldPassword) {
+        if (user.password !== oldPassword) {
           return { success: false, message: 'Mot de passe actuel incorrect' };
         }
         
-        if (newPassword.length < 8) {
-          return { success: false, message: 'Le nouveau mot de passe doit contenir au moins 8 caractères' };
+        // Vérifier la force du mot de passe
+        if (!this.isPasswordStrong(newPassword)) {
+          return { success: false, message: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial' };
         }
         
-        this.users[username] = newPassword;
-        this.savePasswords();
+        user.password = newPassword;
+        user.mustChangePassword = false;
+        user.updated_at = new Date().toISOString();
+        this.saveUsers();
+        
         return { success: true, message: 'Mot de passe changé avec succès' };
       }
 
-      resetToDefault() {
-        this.users = { ...this.defaultUsers };
-        this.savePasswords();
+      isPasswordStrong(password) {
+        const hasMinLength = password.length >= 8;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+        
+        return hasMinLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar;
       }
 
-      getUsername() {
-        return sessionStorage.getItem('fleet_username') || localStorage.getItem('fleet_username');
+      addUser(userData, createdBy) {
+        // Vérifier si l'utilisateur existe déjà
+        if (this.users.some(u => u.username === userData.username)) {
+          return { success: false, message: 'Ce nom d\'utilisateur existe déjà' };
+        }
+
+        // Générer un mot de passe sécurisé
+        const generatedPassword = this.generateSecurePassword();
+
+        const newUser = {
+          username: userData.username,
+          password: generatedPassword,
+          role: userData.role,
+          fullname: userData.fullname,
+          email: userData.email,
+          mustChangePassword: true,
+          created_at: new Date().toISOString(),
+          created_by: createdBy,
+          last_login: null
+        };
+
+        this.users.push(newUser);
+        this.saveUsers();
+        
+        return { 
+          success: true, 
+          message: 'Utilisateur ajouté avec succès', 
+          user: { ...newUser, password: undefined },
+          generatedPassword: generatedPassword 
+        };
+      }
+
+      updateUser(username, updates) {
+        const index = this.users.findIndex(u => u.username === username);
+        if (index === -1) {
+          return { success: false, message: 'Utilisateur non trouvé' };
+        }
+
+        // Ne pas permettre la modification du mot de passe via cette méthode
+        const { password, ...safeUpdates } = updates;
+        
+        this.users[index] = { ...this.users[index], ...safeUpdates, updated_at: new Date().toISOString() };
+        this.saveUsers();
+        
+        return { success: true, message: 'Utilisateur mis à jour avec succès' };
+      }
+
+      deleteUser(username, currentUsername) {
+        // Ne pas permettre la suppression de son propre compte
+        if (username === currentUsername) {
+          return { success: false, message: 'Vous ne pouvez pas supprimer votre propre compte' };
+        }
+
+        // Ne pas permettre la suppression des utilisateurs par défaut
+        if (['admin', 'gestionnaire', 'utilisateur'].includes(username)) {
+          return { success: false, message: 'Les utilisateurs par défaut ne peuvent pas être supprimés' };
+        }
+
+        const index = this.users.findIndex(u => u.username === username);
+        if (index === -1) {
+          return { success: false, message: 'Utilisateur non trouvé' };
+        }
+
+        this.users.splice(index, 1);
+        this.saveUsers();
+        
+        return { success: true, message: 'Utilisateur supprimé avec succès' };
+      }
+
+      getUserRole(username) {
+        const user = this.users.find(u => u.username === username);
+        return user ? user.role : null;
+      }
+
+      getUsers() {
+        // Retourner les utilisateurs sans les mots de passe
+        return this.users.map(u => ({
+          username: u.username,
+          role: u.role,
+          fullname: u.fullname,
+          email: u.email,
+          mustChangePassword: u.mustChangePassword,
+          created_at: u.created_at,
+          last_login: u.last_login,
+          created_by: u.created_by
+        }));
+      }
+
+      getCurrentUsername() {
+        return localStorage.getItem('fleet_username') || sessionStorage.getItem('fleet_username');
+      }
+
+      mustChangePassword(username) {
+        const user = this.users.find(u => u.username === username);
+        return user ? user.mustChangePassword : false;
+      }
+
+      resetPassword(username, currentUsername) {
+        const user = this.users.find(u => u.username === username);
+        if (!user) {
+          return { success: false, message: 'Utilisateur non trouvé' };
+        }
+
+        // Ne pas permettre la réinitialisation de son propre mot de passe (utiliser le changement normal)
+        if (username === currentUsername) {
+          return { success: false, message: 'Utilisez le changement de mot de passe pour modifier votre propre mot de passe' };
+        }
+
+        const newPassword = this.generateSecurePassword();
+        user.password = newPassword;
+        user.mustChangePassword = true;
+        this.saveUsers();
+        
+        return { success: true, message: 'Mot de passe réinitialisé avec succès', newPassword: newPassword };
+      }
+
+      // NOUVELLES MÉTHODES POUR LES LIENS DE CONNEXION
+      
+      // Générer un token unique pour le lien de connexion
+      generateLoginToken(username) {
+        const token = this.generateSecurePassword() + Date.now() + Math.random().toString(36).substring(2);
+        const hashedToken = btoa(token); // Encodage simple (à remplacer par un vrai hash en production)
+        
+        // Stocker le token avec une expiration (24h)
+        const expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + 24);
+        
+        const loginTokens = JSON.parse(localStorage.getItem('fleet_login_tokens') || '{}');
+        loginTokens[hashedToken] = {
+          username: username,
+          expiry: expiryDate.toISOString(),
+          used: false
+        };
+        localStorage.setItem('fleet_login_tokens', JSON.stringify(loginTokens));
+        
+        return hashedToken;
+      }
+
+      // Valider un token de connexion
+      validateLoginToken(token) {
+        const loginTokens = JSON.parse(localStorage.getItem('fleet_login_tokens') || '{}');
+        const tokenData = loginTokens[token];
+        
+        if (!tokenData) {
+          return { valid: false, message: 'Lien de connexion invalide' };
+        }
+        
+        if (tokenData.used) {
+          return { valid: false, message: 'Ce lien de connexion a déjà été utilisé' };
+        }
+        
+        const expiryDate = new Date(tokenData.expiry);
+        if (expiryDate < new Date()) {
+          return { valid: false, message: 'Ce lien de connexion a expiré' };
+        }
+        
+        // Marquer le token comme utilisé
+        tokenData.used = true;
+        loginTokens[token] = tokenData;
+        localStorage.setItem('fleet_login_tokens', JSON.stringify(loginTokens));
+        
+        return { valid: true, username: tokenData.username };
+      }
+
+      // Nettoyer les tokens expirés
+      cleanExpiredTokens() {
+        const loginTokens = JSON.parse(localStorage.getItem('fleet_login_tokens') || '{}');
+        const now = new Date();
+        let cleaned = false;
+        
+        Object.keys(loginTokens).forEach(token => {
+          if (new Date(loginTokens[token].expiry) < now) {
+            delete loginTokens[token];
+            cleaned = true;
+          }
+        });
+        
+        if (cleaned) {
+          localStorage.setItem('fleet_login_tokens', JSON.stringify(loginTokens));
+        }
+      }
+
+      // Générer l'URL de connexion
+      generateLoginUrl(username) {
+        const baseUrl = window.location.href.split('#')[0].split('?')[0];
+        const token = this.generateLoginToken(username);
+        return `${baseUrl}?logintoken=${token}`;
+      }
+
+      // Traiter la connexion par token au chargement de la page
+      processLoginToken() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('logintoken');
+        
+        if (token) {
+          const validation = this.validateLoginToken(token);
+          if (validation.valid) {
+            // Connecter automatiquement l'utilisateur
+            currentUser = validation.username;
+            sessionStorage.setItem('fleetAuth', 'true');
+            sessionStorage.setItem('fleet_username', validation.username);
+            
+            // Nettoyer l'URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            updateUserDisplay();
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('main-app').classList.add('visible');
+            
+            // Afficher le message de bienvenue personnalisé
+            const user = this.users.find(u => u.username === validation.username);
+            const welcomeMessage = user ? `BIENVENU SUR L'APPLICATION GESTION DE FLOTTE, ${user.fullname || user.username} !` : 'BIENVENU SUR L\'APPLICATION GESTION DE FLOTTE !';
+            
+            // Afficher une notification spéciale
+            showToast(welcomeMessage, 'success', 5000);
+            
+            // Vérifier si l'utilisateur doit changer son mot de passe
+            if (user && user.mustChangePassword) {
+              setTimeout(() => {
+                showToast('Veuillez changer votre mot de passe pour des raisons de sécurité', 'warning');
+                document.getElementById('change-password-modal').classList.add('show');
+              }, 1000);
+            }
+            
+            initApp();
+            return true;
+          } else {
+            showToast(validation.message, 'error');
+          }
+        }
+        return false;
       }
     }
 
-    const passwordManager = new PasswordManager();
+    // Système de permissions basé sur les rôles
+    class PermissionManager {
+      constructor(userManager) {
+        this.userManager = userManager;
+        this.permissions = {
+          admin: {
+            canCreate: true,
+            canEdit: true,
+            canDelete: true,
+            canView: true,
+            canExport: true,
+            canImport: true,
+            canManageUsers: true,
+            canViewAllData: true,
+            canModifyAllData: true
+          },
+          gestionnaire: {
+            canCreate: true,
+            canEdit: true,
+            canDelete: false,
+            canView: true,
+            canExport: true,
+            canImport: true,
+            canManageUsers: false,
+            canViewAllData: true,
+            canModifyAllData: true
+          },
+          utilisateur: {
+            canCreate: false,
+            canEdit: false,
+            canDelete: false,
+            canView: true,
+            canExport: false,
+            canImport: false,
+            canManageUsers: false,
+            canViewAllData: true,
+            canModifyAllData: false
+          }
+        };
+      }
+
+      hasPermission(action) {
+        const username = this.userManager.getCurrentUsername();
+        if (!username) return false;
+        
+        const role = this.userManager.getUserRole(username);
+        if (!role) return false;
+        
+        return this.permissions[role]?.[action] || false;
+      }
+
+      getRole() {
+        const username = this.userManager.getCurrentUsername();
+        return username ? this.userManager.getUserRole(username) : null;
+      }
+
+      applyUIPermissions() {
+        const role = this.getRole();
+        
+        // Gestion des boutons d'administration
+        const manageUsersBtn = document.getElementById('manage-users');
+        if (manageUsersBtn) {
+          manageUsersBtn.style.display = role === 'admin' ? 'inline-flex' : 'none';
+        }
+
+        // Gestion des boutons d'édition/suppression
+        const editButtons = document.querySelectorAll('.edit-vehicle, .edit-bike, .edit-generator');
+        const deleteButtons = document.querySelectorAll('.delete-vehicle, .delete-bike, .delete-generator');
+        
+        if (!this.hasPermission('canEdit')) {
+          editButtons.forEach(btn => btn.style.display = 'none');
+        }
+        
+        if (!this.hasPermission('canDelete')) {
+          deleteButtons.forEach(btn => btn.style.display = 'none');
+        }
+
+        // Gestion des formulaires de création
+        const forms = ['vehicule-form', 'bike-form', 'generator-form', 
+                      'carburant-form', 'bike-carburant-form', 'generator-carburant-form',
+                      'vehicle-maintenance-form', 'bike-maintenance-form', 'generator-maintenance-form'];
+        
+        const canCreate = this.hasPermission('canCreate');
+        forms.forEach(formId => {
+          const form = document.getElementById(formId);
+          if (form) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+              submitBtn.disabled = !canCreate;
+            }
+          }
+        });
+
+        // Gestion des boutons d'export/import
+        const exportBtn = document.getElementById('export-excel');
+        const importBtn = document.getElementById('import-excel');
+        
+        if (exportBtn) exportBtn.disabled = !this.hasPermission('canExport');
+        if (importBtn) importBtn.disabled = !this.hasPermission('canImport');
+      }
+    }
+
+    const userManager = new UserManager();
+    const permissionManager = new PermissionManager(userManager);
     let currentUser = null;
 
     // Vérifier si l'utilisateur est déjà connecté
     function checkAuth() {
+      // Nettoyer les tokens expirés
+      userManager.cleanExpiredTokens();
+      
+      // Vérifier d'abord si un token de connexion est présent
+      if (userManager.processLoginToken()) {
+        return;
+      }
+      
       const isAuthenticated = sessionStorage.getItem('fleetAuth') === 'true' || localStorage.getItem('fleetAuth') === 'true';
       const username = sessionStorage.getItem('fleet_username') || localStorage.getItem('fleet_username');
       
       if (isAuthenticated && username) {
-        currentUser = username;
-        document.getElementById('current-user').textContent = username;
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('main-app').classList.add('visible');
-        initApp();
+        const user = userManager.users.find(u => u.username === username);
+        if (user) {
+          currentUser = username;
+          updateUserDisplay();
+          
+          // Vérifier si l'utilisateur doit changer son mot de passe
+          if (user.mustChangePassword) {
+            setTimeout(() => {
+              showToast('Veuillez changer votre mot de passe pour des raisons de sécurité', 'warning');
+              document.getElementById('change-password-modal').classList.add('show');
+            }, 1000);
+          }
+          
+          document.getElementById('login-container').style.display = 'none';
+          document.getElementById('main-app').classList.add('visible');
+          initApp();
+        } else {
+          logout();
+        }
       } else {
         document.getElementById('login-container').style.display = 'flex';
         document.getElementById('main-app').classList.remove('visible');
+      }
+    }
+
+    function updateUserDisplay() {
+      const user = userManager.users.find(u => u.username === currentUser);
+      if (user) {
+        document.getElementById('current-user').textContent = user.fullname || user.username;
+        const roleBadge = document.getElementById('user-role-badge');
+        roleBadge.textContent = user.role === 'admin' ? 'Administrateur' : 
+                               user.role === 'gestionnaire' ? 'Gestionnaire' : 'Utilisateur';
+        roleBadge.className = `user-badge ${user.role}`;
       }
     }
 
@@ -1932,10 +2610,12 @@
       e.preventDefault();
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
-      const remember = false;
+      const remember = document.getElementById('remember-me').checked;
       const errorElement = document.getElementById('login-error');
 
-      if (passwordManager.validateUser(username, password)) {
+      const result = userManager.validateUser(username, password);
+
+      if (result.success) {
         currentUser = username;
         
         if (remember) {
@@ -1946,22 +2626,32 @@
           sessionStorage.setItem('fleet_username', username);
         }
         
-        document.getElementById('current-user').textContent = username;
+        updateUserDisplay();
+        
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('main-app').classList.add('visible');
         errorElement.textContent = '';
         document.getElementById('password').value = '';
         document.getElementById('username').value = '';
         
-        showToast(`Bienvenue ${username} !`, 'success');
+        showToast(`Bienvenue ${result.user.fullname || username} !`, 'success');
+        
+        // Vérifier si l'utilisateur doit changer son mot de passe
+        if (result.user.mustChangePassword) {
+          setTimeout(() => {
+            showToast('Veuillez changer votre mot de passe pour des raisons de sécurité', 'warning');
+            document.getElementById('change-password-modal').classList.add('show');
+          }, 1000);
+        }
+        
         initApp();
       } else {
-        errorElement.textContent = 'Nom d\'utilisateur ou mot de passe incorrect';
+        errorElement.textContent = result.message;
       }
     });
 
     // Gestionnaire de déconnexion
-    document.getElementById('logout-btn').addEventListener('click', function() {
+    function logout() {
       localStorage.removeItem('fleetAuth');
       localStorage.removeItem('fleet_username');
       sessionStorage.removeItem('fleetAuth');
@@ -1971,7 +2661,9 @@
       document.getElementById('login-container').style.display = 'flex';
       document.getElementById('main-app').classList.remove('visible');
       showToast('Déconnexion réussie', 'success');
-    });
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logout);
 
     // Gestionnaire de changement de mot de passe
     document.getElementById('change-password').addEventListener('click', function() {
@@ -1996,17 +2688,15 @@
       const strengthBar = document.getElementById('password-strength-bar');
       const requirements = document.getElementById('password-requirements');
       
-      if (password.length >= 8) {
-        if (password.length >= 12 && /[!@#$%^&*]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-          strengthBar.className = 'password-strength-bar strong';
-          requirements.textContent = 'Mot de passe fort';
-        } else if (password.length >= 8) {
-          strengthBar.className = 'password-strength-bar medium';
-          requirements.textContent = 'Mot de passe moyen';
-        }
+      if (userManager.isPasswordStrong(password)) {
+        strengthBar.className = 'password-strength-bar strong';
+        requirements.textContent = 'Mot de passe fort';
+      } else if (password.length >= 8) {
+        strengthBar.className = 'password-strength-bar medium';
+        requirements.textContent = 'Mot de passe moyen - Ajoutez majuscule, chiffre et caractère spécial';
       } else {
         strengthBar.className = 'password-strength-bar weak';
-        requirements.textContent = 'Le mot de passe doit contenir au moins 8 caractères';
+        requirements.textContent = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial';
       }
     });
 
@@ -2025,7 +2715,7 @@
         return;
       }
 
-      const result = passwordManager.changePassword(currentUser, currentPassword, newPassword);
+      const result = userManager.changePassword(currentUser, currentPassword, newPassword);
       
       if (result.success) {
         showToast(result.message, 'success');
@@ -2035,7 +2725,347 @@
       }
     });
 
-    // Gestionnaire de base de données locale (IndexedDB)
+    // Gestion des utilisateurs (Admin seulement)
+    document.getElementById('manage-users').addEventListener('click', function() {
+      if (!permissionManager.hasPermission('canManageUsers')) {
+        showToast('Vous n\'avez pas les droits pour gérer les utilisateurs', 'error');
+        return;
+      }
+      renderUsersList();
+      document.getElementById('user-management-modal').classList.add('show');
+    });
+
+    document.getElementById('close-user-modal').addEventListener('click', function() {
+      document.getElementById('user-management-modal').classList.remove('show');
+    });
+
+    document.getElementById('close-user-modal-btn').addEventListener('click', function() {
+      document.getElementById('user-management-modal').classList.remove('show');
+    });
+
+    // Gestionnaires pour la modale de lien
+    document.getElementById('close-link-modal').addEventListener('click', function() {
+      document.getElementById('login-link-modal').classList.remove('show');
+    });
+
+    document.getElementById('close-link-btn').addEventListener('click', function() {
+      document.getElementById('login-link-modal').classList.remove('show');
+    });
+
+    document.getElementById('copy-link-btn').addEventListener('click', function() {
+      const link = document.getElementById('login-link-display').value;
+      navigator.clipboard.writeText(link).then(() => {
+        showToast('Lien copié dans le presse-papiers', 'success');
+      }).catch(() => {
+        showToast('Erreur lors de la copie', 'error');
+      });
+    });
+
+    document.getElementById('send-link-btn').addEventListener('click', function() {
+      const username = document.getElementById('link-username-display').textContent;
+      const link = document.getElementById('login-link-display').value;
+      const user = userManager.users.find(u => u.username === username);
+      
+      if (user && user.email) {
+        // Simuler l'envoi d'email (dans une vraie application, appeler une API)
+        const subject = encodeURIComponent('Lien de connexion - Gestion de Flotte');
+        const body = encodeURIComponent(
+          `Bonjour ${user.fullname},\n\n` +
+          `Vous venez d'effectuer une demande de connexion sur l'application de Gestion de Flotte de la Poste Guinéenne.\n\n` +
+          `Voici votre lien de connexion sécurisé (valable 24h) :\n${link}\n\n` +
+          `Ce lien est à usage unique et expire après 24 heures.\n\n` +
+          `BIENVENU SUR L'APPLICATION GESTION DE FLOTTE !\n\n` +
+          `Cordialement,\nL'équipe de Gestion de Flotte`
+        );
+        
+        // Ouvrir le client mail par défaut
+        window.location.href = `mailto:${user.email}?subject=${subject}&body=${body}`;
+        
+        showToast(`Client email ouvert pour envoyer le lien à ${user.email}`, 'success');
+        document.getElementById('login-link-modal').classList.remove('show');
+      } else {
+        showToast('Adresse email non disponible pour cet utilisateur', 'error');
+      }
+    });
+
+    // Fonction pour générer et afficher le lien de connexion
+    function generateLoginLink(username) {
+      const loginUrl = userManager.generateLoginUrl(username);
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + 24);
+      
+      document.getElementById('link-username-display').textContent = username;
+      document.getElementById('login-link-display').value = loginUrl;
+      document.getElementById('link-expiry-date').textContent = expiryDate.toLocaleString('fr-FR');
+      
+      document.getElementById('login-link-modal').classList.add('show');
+    }
+
+    // Modification de la fonction showToast pour supporter une durée personnalisée
+    function showToast(message, type = 'info', duration = 3000) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      
+      toast.textContent = message;
+      toast.className = `toast show ${type}`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, duration);
+    }
+
+    // Fonction pour envoyer les identifiants par email (NOUVELLE FONCTION)
+    function sendCredentialsByEmail(username, password, email, fullname, role) {
+      if (!email) {
+        showToast('Adresse email non disponible pour cet utilisateur', 'error');
+        return;
+      }
+
+      const subject = encodeURIComponent('Vos identifiants de connexion - Gestion de Flotte');
+      const body = encodeURIComponent(
+        `Bonjour ${fullname || username},\n\n` +
+        `BIENVENU SUR L'APPLICATION GESTION DE FLOTTE DE LA POSTE GUINÉENNE !\n\n` +
+        `Votre compte a été créé avec succès. Voici vos identifiants de connexion :\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `🔐 IDENTIFIANTS DE CONNEXION\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `👤 Nom d'utilisateur : ${username}\n` +
+        `🔑 Mot de passe : ${password}\n` +
+        `📋 Rôle : ${role}\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `⚠️ IMPORTANT :\n` +
+        `• Vous devrez changer votre mot de passe à la première connexion\n` +
+        `• Pour des raisons de sécurité, ne partagez pas ces identifiants\n` +
+        `• En cas de problème, contactez l'administrateur\n\n` +
+        `Lien de connexion : ${window.location.href}\n\n` +
+        `Cordialement,\n` +
+        `L'équipe de Gestion de Flotte\n` +
+        `La Poste Guinéenne`
+      );
+      
+      // Ouvrir le client mail par défaut
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      
+      showToast(`Client email ouvert pour envoyer les identifiants à ${email}`, 'success');
+    }
+
+    document.getElementById('add-user-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const userData = {
+        username: document.getElementById('new-username').value,
+        role: document.getElementById('new-role').value,
+        fullname: document.getElementById('new-fullname').value,
+        email: document.getElementById('new-email').value
+      };
+
+      const result = userManager.addUser(userData, currentUser);
+      
+      if (result.success) {
+        // Afficher la modale avec les identifiants
+        document.getElementById('new-username-display').textContent = result.user.username;
+        document.getElementById('new-password-display').textContent = result.generatedPassword;
+        document.getElementById('new-email-display').textContent = userData.email;
+        const roleText = result.user.role === 'admin' ? 'Administrateur' : 
+                        result.user.role === 'gestionnaire' ? 'Gestionnaire' : 'Utilisateur';
+        document.getElementById('new-role-display').textContent = roleText;
+        
+        document.getElementById('user-credentials-modal').classList.add('show');
+        
+        renderUsersList();
+        this.reset();
+      } else {
+        showToast(result.message, 'error');
+      }
+    });
+
+    // Gestionnaire pour le bouton d'envoi d'email dans la modale des identifiants (NOUVEAU)
+    document.getElementById('send-credentials-email-btn').addEventListener('click', function() {
+      const username = document.getElementById('new-username-display').textContent;
+      const password = document.getElementById('new-password-display').textContent;
+      const email = document.getElementById('new-email-display').textContent;
+      const role = document.getElementById('new-role-display').textContent;
+      const fullname = document.getElementById('new-fullname')?.value || username;
+      
+      sendCredentialsByEmail(username, password, email, fullname, role);
+      document.getElementById('user-credentials-modal').classList.remove('show');
+    });
+
+    // Gestion de la modale des identifiants
+    document.getElementById('close-credentials-modal').addEventListener('click', function() {
+      document.getElementById('user-credentials-modal').classList.remove('show');
+    });
+
+    document.getElementById('close-credentials-btn').addEventListener('click', function() {
+      document.getElementById('user-credentials-modal').classList.remove('show');
+    });
+
+    document.getElementById('copy-credentials-btn').addEventListener('click', function() {
+      const username = document.getElementById('new-username-display').textContent;
+      const password = document.getElementById('new-password-display').textContent;
+      const role = document.getElementById('new-role-display').textContent;
+      const email = document.getElementById('new-email-display').textContent;
+      
+      const credentials = `Identifiants de connexion\nNom d'utilisateur: ${username}\nMot de passe: ${password}\nRôle: ${role}\nEmail: ${email}\n\nImportant: Changez votre mot de passe à la première connexion.\n\nBIENVENU SUR L'APPLICATION GESTION DE FLOTTE DE LA POSTE GUINÉENNE !`;
+      
+      navigator.clipboard.writeText(credentials).then(() => {
+        showToast('Identifiants copiés dans le presse-papiers', 'success');
+      }).catch(() => {
+        showToast('Erreur lors de la copie', 'error');
+      });
+    });
+
+    document.getElementById('print-credentials-btn').addEventListener('click', function() {
+      const username = document.getElementById('new-username-display').textContent;
+      const password = document.getElementById('new-password-display').textContent;
+      const role = document.getElementById('new-role-display').textContent;
+      const email = document.getElementById('new-email-display').textContent;
+      
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Identifiants de connexion</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 40px; }
+              .container { max-width: 600px; margin: 0 auto; border: 2px solid #3498db; padding: 30px; border-radius: 10px; }
+              h1 { color: #2c3e50; text-align: center; }
+              .welcome { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0; }
+              .info { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+              .label { font-weight: bold; color: #3498db; }
+              .value { font-family: monospace; font-size: 1.2em; margin-left: 10px; }
+              .warning { background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>Identifiants de connexion</h1>
+              <div class="welcome">
+                <strong>BIENVENU SUR L'APPLICATION GESTION DE FLOTTE DE LA POSTE GUINÉENNE !</strong>
+              </div>
+              <div class="info">
+                <p><span class="label">Nom d'utilisateur:</span> <span class="value">${username}</span></p>
+                <p><span class="label">Mot de passe:</span> <span class="value">${password}</span></p>
+                <p><span class="label">Rôle:</span> <span class="value">${role}</span></p>
+                <p><span class="label">Email:</span> <span class="value">${email}</span></p>
+              </div>
+              <div class="warning">
+                <strong>Important:</strong> Changez votre mot de passe à la première connexion.
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    });
+
+    function renderUsersList() {
+      const container = document.getElementById('users-list');
+      const users = userManager.getUsers();
+      
+      container.innerHTML = '';
+      
+      users.forEach(user => {
+        const card = document.createElement('div');
+        card.className = `user-card ${user.role}`;
+        card.innerHTML = `
+          <div class="user-role">${user.role === 'admin' ? 'Administrateur' : user.role === 'gestionnaire' ? 'Gestionnaire' : 'Utilisateur'}</div>
+          <h4>${user.fullname}</h4>
+          <p><i class="fas fa-user"></i> ${user.username}</p>
+          <p><i class="fas fa-envelope"></i> ${user.email}</p>
+          <p><i class="fas fa-clock"></i> Dernière connexion: ${user.last_login ? new Date(user.last_login).toLocaleDateString('fr-FR') : 'Jamais'}</p>
+          <p><i class="fas fa-flag"></i> ${user.mustChangePassword ? 'Doit changer son mot de passe' : 'Mot de passe OK'}</p>
+          <p><i class="fas fa-user-tag"></i> Créé par: ${user.created_by || 'admin'}</p>
+          <div class="user-actions">
+            <button class="btn btn-sm btn-primary generate-link" data-username="${user.username}" title="Générer un lien de connexion"><i class="fas fa-link"></i></button>
+            <button class="btn btn-sm btn-success send-credentials-email" data-username="${user.username}" data-email="${user.email}" data-fullname="${user.fullname}" data-role="${user.role}" title="Envoyer les identifiants par email"><i class="fas fa-envelope"></i></button>
+            ${user.username !== 'admin' && user.username !== 'gestionnaire' && user.username !== 'utilisateur' ? 
+              `<button class="btn btn-sm btn-danger delete-user" data-username="${user.username}"><i class="fas fa-trash"></i></button>` : ''}
+            <button class="btn btn-sm btn-warning reset-password" data-username="${user.username}"><i class="fas fa-key"></i> Reset</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Ajouter les événements pour les liens de connexion
+      document.querySelectorAll('.generate-link').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const username = this.dataset.username;
+          generateLoginLink(username);
+        });
+      });
+
+      // Ajouter les événements pour l'envoi d'email (NOUVEAU)
+      document.querySelectorAll('.send-credentials-email').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const username = this.dataset.username;
+          const email = this.dataset.email;
+          const fullname = this.dataset.fullname;
+          const role = this.dataset.role;
+          
+          // Récupérer le mot de passe de l'utilisateur
+          const user = userManager.users.find(u => u.username === username);
+          if (user) {
+            // Afficher une boîte de dialogue pour confirmer l'envoi
+            if (confirm(`Voulez-vous envoyer les identifiants de ${fullname || username} par email à ${email} ?`)) {
+              document.getElementById('new-username-display').textContent = username;
+              document.getElementById('new-password-display').textContent = user.password;
+              document.getElementById('new-email-display').textContent = email;
+              const roleText = role === 'admin' ? 'Administrateur' : 
+                              role === 'gestionnaire' ? 'Gestionnaire' : 'Utilisateur';
+              document.getElementById('new-role-display').textContent = roleText;
+              
+              document.getElementById('user-credentials-modal').classList.add('show');
+            }
+          } else {
+            showToast('Utilisateur non trouvé', 'error');
+          }
+        });
+      });
+
+      // Ajouter les événements pour les boutons de suppression
+      document.querySelectorAll('.delete-user').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const username = this.dataset.username;
+          if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${username} ?`)) {
+            const result = userManager.deleteUser(username, currentUser);
+            if (result.success) {
+              showToast(result.message, 'success');
+              renderUsersList();
+            } else {
+              showToast(result.message, 'error');
+            }
+          }
+        });
+      });
+
+      // Ajouter les événements pour les boutons de réinitialisation
+      document.querySelectorAll('.reset-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const username = this.dataset.username;
+          if (confirm(`Réinitialiser le mot de passe de ${username} ?`)) {
+            const result = userManager.resetPassword(username, currentUser);
+            if (result.success) {
+              // Afficher la modale avec le nouveau mot de passe
+              document.getElementById('new-username-display').textContent = username;
+              document.getElementById('new-password-display').textContent = result.newPassword;
+              const user = userManager.users.find(u => u.username === username);
+              document.getElementById('new-email-display').textContent = user.email;
+              const roleText = user.role === 'admin' ? 'Administrateur' : 
+                              user.role === 'gestionnaire' ? 'Gestionnaire' : 'Utilisateur';
+              document.getElementById('new-role-display').textContent = roleText;
+              
+              document.getElementById('user-credentials-modal').classList.add('show');
+            } else {
+              showToast(result.message, 'error');
+            }
+          }
+        });
+      });
+    }
+
+    // Gestionnaire de base de données locale (IndexedDB) - inchangé
     class LocalDatabase {
       constructor() {
         this.dbName = 'FleetManagementDB';
@@ -2122,6 +3152,7 @@
 
           const item = {
             ...data,
+            created_by: currentUser,
             created_at: data.created_at || new Date().toISOString(),
             updated_at: data.updated_at || new Date().toISOString()
           };
@@ -2157,6 +3188,7 @@
             const updated = {
               ...existing,
               ...data,
+              updated_by: currentUser,
               updated_at: new Date().toISOString()
             };
 
@@ -2287,71 +3319,16 @@
         renderGeneratorHistory();
         
         populateAllDropdowns();
+        
+        // Appliquer les permissions
+        permissionManager.applyUIPermissions();
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
         showToast('Erreur lors du chargement des données', 'error');
       }
     }
 
-    // Fonctions de chargement spécifiques
-    async function loadVehicles() {
-      vehicles = await db.getAll('vehicles');
-      vehicles.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderVehiclesList();
-      populateVehicleDropdowns();
-    }
-
-    async function loadFuelRecords() {
-      fuelRecords = await db.getAll('vehicleFuel');
-      fuelRecords.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderHistory();
-    }
-
-    async function loadVehicleMaintenance() {
-      vehicleMaintenance = await db.getAll('vehicleMaintenance');
-      vehicleMaintenance.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderHistory();
-    }
-
-    async function loadBikes() {
-      bikes = await db.getAll('bikes');
-      bikes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderBikesList();
-      populateBikeDropdowns();
-    }
-
-    async function loadBikeMaintenance() {
-      bikeMaintenance = await db.getAll('bikeMaintenance');
-      bikeMaintenance.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderBikeHistory();
-    }
-
-    async function loadBikeFuelRecords() {
-      bikeFuelRecords = await db.getAll('bikeFuel');
-      bikeFuelRecords.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderBikeHistory();
-    }
-
-    async function loadGenerators() {
-      generators = await db.getAll('generators');
-      generators.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderGeneratorsList();
-      populateGeneratorDropdowns();
-    }
-
-    async function loadGeneratorFuelRecords() {
-      generatorFuelRecords = await db.getAll('generatorFuel');
-      generatorFuelRecords.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderGeneratorHistory();
-    }
-
-    async function loadGeneratorMaintenance() {
-      generatorMaintenance = await db.getAll('generatorMaintenance');
-      generatorMaintenance.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      renderGeneratorHistory();
-    }
-
-    // Fonctions de rendu
+    // Fonctions de rendu (à conserver telles quelles)
     function renderVehiclesList() {
       const container = document.getElementById('liste-vehicules');
       if (!container) return;
@@ -2367,9 +3344,9 @@
           <td>${formatStatus(vehicle.statut)}</td>
           <td><span class="localisation-status ${vehicle.localisation}">${formatLocalisation(vehicle.localisation)}</span></td>
           <td>
-            <button class="btn btn-sm btn-outline edit-vehicle" data-id="${vehicle.id}"><i class="fas fa-edit"></i></button>
+            ${permissionManager.hasPermission('canEdit') ? `<button class="btn btn-sm btn-outline edit-vehicle" data-id="${vehicle.id}"><i class="fas fa-edit"></i></button>` : ''}
             <button class="btn btn-sm btn-outline view-vehicle" data-id="${vehicle.id}"><i class="fas fa-eye"></i></button>
-            <button class="btn btn-sm btn-outline delete-vehicle" data-id="${vehicle.id}"><i class="fas fa-trash"></i></button>
+            ${permissionManager.hasPermission('canDelete') ? `<button class="btn btn-sm btn-outline delete-vehicle" data-id="${vehicle.id}"><i class="fas fa-trash"></i></button>` : ''}
           </td>
         `;
         container.appendChild(tr);
@@ -2401,6 +3378,10 @@
     }
 
     function handleEditVehicle(e) {
+      if (!permissionManager.hasPermission('canEdit')) {
+        showToast('Vous n\'avez pas les droits pour modifier', 'error');
+        return;
+      }
       const id = parseInt(e.currentTarget.dataset.id);
       editVehicle(id);
     }
@@ -2410,11 +3391,210 @@
       viewVehicle(id);
     }
 
-    function handleDeleteVehicle(e) {
+    async function handleDeleteVehicle(e) {
+      if (!permissionManager.hasPermission('canDelete')) {
+        showToast('Vous n\'avez pas les droits pour supprimer', 'error');
+        return;
+      }
       const id = parseInt(e.currentTarget.dataset.id);
-      deleteVehicle(id);
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {
+        await deleteVehicle(id);
+      }
     }
 
+    function editVehicle(id) {
+      const vehicle = vehicles.find(v => v.id === id);
+      if (!vehicle) return;
+      
+      document.getElementById('immatriculation').value = vehicle.immatriculation || '';
+      document.getElementById('marque').value = vehicle.marque || '';
+      document.getElementById('type').value = vehicle.type || '';
+      document.getElementById('date_circulation').value = vehicle.date_circulation || '';
+      document.getElementById('statut').value = vehicle.statut || 'en service';
+      document.getElementById('localisation').value = vehicle.localisation || 'en_circulation';
+      document.getElementById('chauffeur').value = vehicle.chauffeur || '';
+      document.getElementById('observations').value = vehicle.observations || '';
+      document.getElementById('departement').value = vehicle.departement || '';
+      document.getElementById('destination').value = vehicle.destination || '';
+      document.getElementById('motif_deplacement').value = vehicle.motif_deplacement || '';
+      document.getElementById('km_avant').value = vehicle.km_avant || '';
+      document.getElementById('km_apres').value = vehicle.km_apres || '';
+      document.getElementById('km_parcouru').value = vehicle.km_parcouru || '';
+      
+      document.getElementById('vehicule-form').setAttribute('data-edit-id', vehicle.id);
+      document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function viewVehicle(id) {
+      const vehicle = vehicles.find(v => v.id === id);
+      if (!vehicle) return;
+      
+      const fuelRecordsForVehicle = fuelRecords.filter(f => f.vehicle_id === id);
+      const maintenanceRecords = vehicleMaintenance.filter(m => m.vehicle_id === id);
+      
+      document.getElementById('modal-title').textContent = `Détails: ${vehicle.immatriculation || 'Véhicule'}`;
+      
+      let html = `
+        <div class="vehicle-details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Marque/Modèle:</span>
+            <span class="detail-value">${vehicle.marque || 'Non spécifié'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type:</span>
+            <span class="detail-value">${formatVehicleType(vehicle.type)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Mise en circulation:</span>
+            <span class="detail-value">${vehicle.date_circulation || 'Non spécifiée'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Statut:</span>
+            <span class="detail-value">${formatStatus(vehicle.statut)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Localisation:</span>
+            <span class="detail-value localisation-status ${vehicle.localisation}">${formatLocalisation(vehicle.localisation)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Chauffeur:</span>
+            <span class="detail-value">${vehicle.chauffeur || 'Non assigné'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Département:</span>
+            <span class="detail-value">${vehicle.departement || 'Non spécifié'}</span>
+          </div>
+          <div class="detail-item full-width">
+            <span class="detail-label">Observations:</span>
+            <span class="detail-value">${vehicle.observations || 'Aucune'}</span>
+          </div>
+        </div>
+      `;
+      
+      if (vehicle.destination) {
+        html += `
+          <h4 class="maintenance-title">Détails du Déplacement</h4>
+          <div class="maintenance-item">
+            <div class="maintenance-header">
+              <span class="maintenance-type">Destination: ${vehicle.destination}</span>
+              <span class="maintenance-date">Motif: ${vehicle.motif_deplacement || 'Non spécifié'}</span>
+            </div>
+            <div class="maintenance-cost">Kilométrage départ: ${vehicle.km_avant || 'N/A'} km</div>
+            <div class="maintenance-cost">Kilométrage arrivée: ${vehicle.km_apres || 'N/A'} km</div>
+            <div class="maintenance-cost">Distance parcourue: ${vehicle.km_parcouru || 'N/A'} km</div>
+          </div>
+        `;
+      }
+      
+      if (fuelRecordsForVehicle.length > 0) {
+        html += `
+          <h4 class="maintenance-title">Historique de ravitaillement</h4>
+          <div class="maintenance-list">
+            ${fuelRecordsForVehicle.map(fuel => `
+              <div class="maintenance-item">
+                <div class="maintenance-header">
+                  <span class="maintenance-type">${fuel.type || 'Carburant'}</span>
+                  <span class="maintenance-date">${formatDate(fuel.date)}</span>
+                </div>
+                <div class="maintenance-cost">Quantité: ${fuel.litres || 0}L</div>
+                <div class="maintenance-cost">Distance: ${fuel.km_parcouru || 0} km</div>
+                <div class="maintenance-cost">Consommation: ${fuel.consommation_100km || 0}L/100km</div>
+                <div class="maintenance-cost">Coût: ${formatCurrency(fuel.cout)}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      if (maintenanceRecords.length > 0) {
+        html += `
+          <h4 class="maintenance-title">Historique de maintenance</h4>
+          <div class="maintenance-list">
+            ${maintenanceRecords.map(maint => `
+              <div class="maintenance-item">
+                <div class="maintenance-header">
+                  <span class="maintenance-type">${formatMaintenanceType(maint.type)}</span>
+                  <span class="maintenance-date">${formatDate(maint.date)}</span>
+                </div>
+                <div class="maintenance-cost">Coût: ${formatCurrency(maint.cout)}</div>
+                <div class="maintenance-description">${maint.description || 'Aucune description'}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      document.getElementById('vehicle-details').innerHTML = html;
+      document.getElementById('vehicle-modal').classList.add('show');
+    }
+
+    async function deleteVehicle(id) {
+      if (!permissionManager.hasPermission('canDelete')) {
+        showToast('Vous n\'avez pas les droits pour supprimer', 'error');
+        return;
+      }
+      
+      try {
+        await db.deleteByIndex('vehicleFuel', 'vehicle_id', id);
+        await db.deleteByIndex('vehicleMaintenance', 'vehicle_id', id);
+        await db.delete('vehicles', id);
+        
+        await loadAllData();
+        showToast('Véhicule supprimé avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        showToast('Erreur lors de la suppression', 'error');
+      }
+    }
+
+    // Fonctions pour les formulaires
+    async function handleVehicleSubmit(e) {
+      e.preventDefault();
+      
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter/modifier', 'error');
+        return;
+      }
+      
+      const formData = {
+        immatriculation: document.getElementById('immatriculation').value,
+        marque: document.getElementById('marque').value,
+        type: document.getElementById('type').value,
+        date_circulation: document.getElementById('date_circulation').value,
+        statut: document.getElementById('statut').value,
+        localisation: document.getElementById('localisation').value,
+        chauffeur: document.getElementById('chauffeur').value,
+        observations: document.getElementById('observations').value,
+        departement: document.getElementById('departement').value,
+        destination: document.getElementById('destination').value,
+        motif_deplacement: document.getElementById('motif_deplacement').value,
+        km_avant: parseFloat(document.getElementById('km_avant').value) || 0,
+        km_apres: parseFloat(document.getElementById('km_apres').value) || 0,
+        km_parcouru: parseFloat(document.getElementById('km_parcouru').value) || 0,
+        created_at: new Date().toISOString()
+      };
+      
+      const vehicleId = e.target.getAttribute('data-edit-id');
+      
+      try {
+        if (vehicleId) {
+          await db.update('vehicles', parseInt(vehicleId), formData);
+          showToast('Véhicule modifié avec succès', 'success');
+        } else {
+          await db.add('vehicles', formData);
+          showToast('Véhicule ajouté avec succès', 'success');
+        }
+        
+        e.target.reset();
+        e.target.removeAttribute('data-edit-id');
+        await loadAllData();
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    // Fonctions de rendu pour les motos
     function renderBikesList() {
       const container = document.getElementById('liste-bikes');
       if (!container) return;
@@ -2430,9 +3610,9 @@
           <td><span class="bike-status ${bike.statut?.replace(' ', '-')}">${formatStatus(bike.statut)}</span></td>
           <td><span class="localisation-status ${bike.localisation}">${formatLocalisation(bike.localisation)}</span></td>
           <td>
-            <button class="btn btn-sm btn-outline edit-bike" data-id="${bike.id}"><i class="fas fa-edit"></i></button>
+            ${permissionManager.hasPermission('canEdit') ? `<button class="btn btn-sm btn-outline edit-bike" data-id="${bike.id}"><i class="fas fa-edit"></i></button>` : ''}
             <button class="btn btn-sm btn-outline view-bike" data-id="${bike.id}"><i class="fas fa-eye"></i></button>
-            <button class="btn btn-sm btn-outline delete-bike" data-id="${bike.id}"><i class="fas fa-trash"></i></button>
+            ${permissionManager.hasPermission('canDelete') ? `<button class="btn btn-sm btn-outline delete-bike" data-id="${bike.id}"><i class="fas fa-trash"></i></button>` : ''}
           </td>
         `;
         container.appendChild(tr);
@@ -2464,6 +3644,10 @@
     }
 
     function handleEditBike(e) {
+      if (!permissionManager.hasPermission('canEdit')) {
+        showToast('Vous n\'avez pas les droits pour modifier', 'error');
+        return;
+      }
       const id = parseInt(e.currentTarget.dataset.id);
       editBike(id);
     }
@@ -2473,11 +3657,138 @@
       viewBike(id);
     }
 
-    function handleDeleteBike(e) {
+    async function handleDeleteBike(e) {
+      if (!permissionManager.hasPermission('canDelete')) {
+        showToast('Vous n\'avez pas les droits pour supprimer', 'error');
+        return;
+      }
       const id = parseInt(e.currentTarget.dataset.id);
-      deleteBike(id);
+      if (confirm('Êtes-vous sûr de vouloir supprimer cette moto ?')) {
+        await deleteBike(id);
+      }
     }
 
+    function editBike(id) {
+      const bike = bikes.find(b => b.id === id);
+      if (!bike) return;
+      
+      document.getElementById('bike_immatriculation').value = bike.immatriculation || '';
+      document.getElementById('bike_marque').value = bike.marque || '';
+      document.getElementById('bike_type').value = bike.type || '';
+      document.getElementById('bike_date_circulation').value = bike.date_circulation || '';
+      document.getElementById('bike_statut').value = bike.statut || 'en service';
+      document.getElementById('bike_localisation').value = bike.localisation || 'en_circulation';
+      document.getElementById('bike_chauffeur').value = bike.chauffeur || '';
+      document.getElementById('bike_observations').value = bike.observations || '';
+      
+      document.getElementById('bike-form').setAttribute('data-edit-id', bike.id);
+      document.getElementById('bike-form-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function viewBike(id) {
+      const bike = bikes.find(b => b.id === id);
+      if (!bike) return;
+      
+      const maintenanceRecords = bikeMaintenance.filter(m => m.bike_id === id);
+      const fuelRecordsForBike = bikeFuelRecords.filter(f => f.bike_id === id);
+      
+      document.getElementById('bike-modal-title').textContent = `Détails: ${bike.immatriculation || 'Moto'}`;
+      
+      let html = `
+        <div class="bike-details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Marque/Modèle:</span>
+            <span class="detail-value">${bike.marque || 'Non spécifié'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type:</span>
+            <span class="detail-value">${formatBikeType(bike.type)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Mise en circulation:</span>
+            <span class="detail-value">${bike.date_circulation || 'Non spécifiée'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Statut:</span>
+            <span class="detail-value bike-status ${bike.statut?.replace(' ', '-')}">${formatStatus(bike.statut)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Localisation:</span>
+            <span class="detail-value localisation-status ${bike.localisation}">${formatLocalisation(bike.localisation)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Conducteur:</span>
+            <span class="detail-value">${bike.chauffeur || 'Non assigné'}</span>
+          </div>
+          <div class="detail-item full-width">
+            <span class="detail-label">Observations:</span>
+            <span class="detail-value">${bike.observations || 'Aucune'}</span>
+          </div>
+        </div>
+      `;
+      
+      if (fuelRecordsForBike.length > 0) {
+        html += `
+          <h4 class="maintenance-title">Historique de ravitaillement</h4>
+          <div class="maintenance-list">
+            ${fuelRecordsForBike.map(fuel => `
+              <div class="maintenance-item">
+                <div class="maintenance-header">
+                  <span class="maintenance-type">${fuel.type || 'Carburant'}</span>
+                  <span class="maintenance-date">${formatDate(fuel.date)}</span>
+                </div>
+                <div class="maintenance-cost">Quantité: ${fuel.litres || 0}L</div>
+                <div class="maintenance-cost">Distance: ${fuel.km_parcouru || 0} km</div>
+                <div class="maintenance-cost">Consommation: ${fuel.consommation_100km || 0}L/100km</div>
+                <div class="maintenance-cost">Coût: ${formatCurrency(fuel.cout)}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      if (maintenanceRecords.length > 0) {
+        html += `
+          <h4 class="maintenance-title">Historique de maintenance</h4>
+          <div class="maintenance-list">
+            ${maintenanceRecords.map(maint => `
+              <div class="maintenance-item">
+                <div class="maintenance-header">
+                  <span class="maintenance-type">${formatMaintenanceType(maint.type)}</span>
+                  <span class="maintenance-date">${formatDate(maint.date)}</span>
+                </div>
+                <div class="maintenance-cost">Coût: ${formatCurrency(maint.cout)}</div>
+                <div class="maintenance-description">${maint.description || 'Aucune description'}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      document.getElementById('bike-details').innerHTML = html;
+      document.getElementById('bike-modal').classList.add('show');
+    }
+
+    async function deleteBike(id) {
+      if (!permissionManager.hasPermission('canDelete')) {
+        showToast('Vous n\'avez pas les droits pour supprimer', 'error');
+        return;
+      }
+      
+      try {
+        await db.deleteByIndex('bikeFuel', 'bike_id', id);
+        await db.deleteByIndex('bikeMaintenance', 'bike_id', id);
+        await db.delete('bikes', id);
+        
+        await loadAllData();
+        showToast('Moto supprimée avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        showToast('Erreur lors de la suppression', 'error');
+      }
+    }
+
+    // Fonctions de rendu pour les groupes électrogènes
     function renderGeneratorsList() {
       const container = document.getElementById('liste-generators');
       if (!container) return;
@@ -2494,9 +3805,9 @@
           <td>${formatStatus(generator.statut)}</td>
           <td><span class="localisation-status ${generator.localisation}">${formatLocalisation(generator.localisation)}</span></td>
           <td>
-            <button class="btn btn-sm btn-outline edit-generator" data-id="${generator.id}"><i class="fas fa-edit"></i></button>
+            ${permissionManager.hasPermission('canEdit') ? `<button class="btn btn-sm btn-outline edit-generator" data-id="${generator.id}"><i class="fas fa-edit"></i></button>` : ''}
             <button class="btn btn-sm btn-outline view-generator" data-id="${generator.id}"><i class="fas fa-eye"></i></button>
-            <button class="btn btn-sm btn-outline delete-generator" data-id="${generator.id}"><i class="fas fa-trash"></i></button>
+            ${permissionManager.hasPermission('canDelete') ? `<button class="btn btn-sm btn-outline delete-generator" data-id="${generator.id}"><i class="fas fa-trash"></i></button>` : ''}
           </td>
         `;
         container.appendChild(tr);
@@ -2528,6 +3839,10 @@
     }
 
     function handleEditGenerator(e) {
+      if (!permissionManager.hasPermission('canEdit')) {
+        showToast('Vous n\'avez pas les droits pour modifier', 'error');
+        return;
+      }
       const id = parseInt(e.currentTarget.dataset.id);
       editGenerator(id);
     }
@@ -2537,11 +3852,138 @@
       viewGenerator(id);
     }
 
-    function handleDeleteGenerator(e) {
+    async function handleDeleteGenerator(e) {
+      if (!permissionManager.hasPermission('canDelete')) {
+        showToast('Vous n\'avez pas les droits pour supprimer', 'error');
+        return;
+      }
       const id = parseInt(e.currentTarget.dataset.id);
-      deleteGenerator(id);
+      if (confirm('Êtes-vous sûr de vouloir supprimer ce groupe électrogène ?')) {
+        await deleteGenerator(id);
+      }
     }
 
+    function editGenerator(id) {
+      const generator = generators.find(g => g.id === id);
+      if (!generator) return;
+      
+      document.getElementById('generator_immatriculation').value = generator.immatriculation || '';
+      document.getElementById('generator_marque').value = generator.marque || '';
+      document.getElementById('generator_type').value = generator.type || '';
+      document.getElementById('generator_puissance').value = generator.puissance || '';
+      document.getElementById('generator_date_mise_service').value = generator.date_mise_service || '';
+      document.getElementById('generator_statut').value = generator.statut || 'en service';
+      document.getElementById('generator_localisation').value = generator.localisation || 'fixe';
+      document.getElementById('generator_observations').value = generator.observations || '';
+      
+      document.getElementById('generator-form').setAttribute('data-edit-id', generator.id);
+      document.getElementById('generator-form-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function viewGenerator(id) {
+      const generator = generators.find(g => g.id === id);
+      if (!generator) return;
+      
+      const fuelRecordsForGenerator = generatorFuelRecords.filter(f => f.generator_id === id);
+      const maintenanceRecords = generatorMaintenance.filter(m => m.generator_id === id);
+      
+      document.getElementById('generator-modal-title').textContent = `Détails: ${generator.immatriculation || 'Groupe'}`;
+      
+      let html = `
+        <div class="generator-details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Marque/Modèle:</span>
+            <span class="detail-value">${generator.marque || 'Non spécifié'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type:</span>
+            <span class="detail-value">${formatGeneratorType(generator.type)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Puissance:</span>
+            <span class="detail-value">${generator.puissance || 0} kVA</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Mise en service:</span>
+            <span class="detail-value">${generator.date_mise_service || 'Non spécifiée'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Statut:</span>
+            <span class="detail-value">${formatStatus(generator.statut)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Localisation:</span>
+            <span class="detail-value localisation-status ${generator.localisation}">${formatLocalisation(generator.localisation)}</span>
+          </div>
+          <div class="detail-item full-width">
+            <span class="detail-label">Observations:</span>
+            <span class="detail-value">${generator.observations || 'Aucune'}</span>
+          </div>
+        </div>
+      `;
+      
+      if (fuelRecordsForGenerator.length > 0) {
+        html += `
+          <h4 class="maintenance-title">Historique de ravitaillement</h4>
+          <div class="maintenance-list">
+            ${fuelRecordsForGenerator.map(fuel => `
+              <div class="maintenance-item">
+                <div class="maintenance-header">
+                  <span class="maintenance-date">${formatDate(fuel.date)}</span>
+                </div>
+                <div class="maintenance-cost">Marche: ${fuel.heure_marche || 'N/A'} - Arrêt: ${fuel.heure_arret || 'N/A'}</div>
+                <div class="maintenance-cost">Quantité ravitaillée: ${fuel.quantite_ravitailler || 0}L</div>
+                <div class="maintenance-cost">Temps fonctionnement: ${fuel.temps_fonctionnement || '00:00'}</div>
+                <div class="maintenance-cost">Consommation: ${fuel.quantite_consommee_heure || 0} L/h</div>
+                <div class="maintenance-cost">Coût: ${formatCurrency(fuel.cout)}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      if (maintenanceRecords.length > 0) {
+        html += `
+          <h4 class="maintenance-title">Historique de maintenance</h4>
+          <div class="maintenance-list">
+            ${maintenanceRecords.map(maint => `
+              <div class="maintenance-item">
+                <div class="maintenance-header">
+                  <span class="maintenance-type">${formatGeneratorMaintenanceType(maint.type)}</span>
+                  <span class="maintenance-date">${formatDate(maint.date)}</span>
+                </div>
+                <div class="maintenance-cost">Coût: ${formatCurrency(maint.cout)}</div>
+                <div class="maintenance-description">${maint.description || 'Aucune description'}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      document.getElementById('generator-details').innerHTML = html;
+      document.getElementById('generator-modal').classList.add('show');
+    }
+
+    async function deleteGenerator(id) {
+      if (!permissionManager.hasPermission('canDelete')) {
+        showToast('Vous n\'avez pas les droits pour supprimer', 'error');
+        return;
+      }
+      
+      try {
+        await db.deleteByIndex('generatorFuel', 'generator_id', id);
+        await db.deleteByIndex('generatorMaintenance', 'generator_id', id);
+        await db.delete('generators', id);
+        
+        await loadAllData();
+        showToast('Groupe électrogène supprimé avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        showToast('Erreur lors de la suppression', 'error');
+      }
+    }
+
+    // Fonctions de rendu des historiques
     function renderHistory() {
       const container = document.getElementById('historique');
       if (!container) return;
@@ -2677,7 +4119,7 @@
       });
     }
 
-    // Formatting Functions
+    // Fonctions de formatage
     function formatVehicleType(type) {
       const types = {
         'voiture': 'Voiture',
@@ -2779,26 +4221,7 @@
       }).replace('GNF', 'GNF').trim();
     }
 
-    function formatToFrenchDate(dateString) {
-      if (!dateString) return '';
-      try {
-        return new Date(dateString).toLocaleDateString('fr-FR');
-      } catch {
-        return dateString;
-      }
-    }
-
-    function convertToStandardDate(dateString) {
-      if (!dateString) return '';
-      
-      const parts = dateString.trim().split(/\s+/);
-      if (parts.length === 3) {
-        const [day, month, year] = parts;
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      }
-      return dateString;
-    }
-
+    // Fonctions helper
     function getVehicleImmat(id) {
       const vehicle = vehicles.find(v => v.id === id);
       return vehicle ? vehicle.immatriculation : 'Véhicule inconnu';
@@ -2814,7 +4237,6 @@
       return generator ? generator.immatriculation : 'Groupe inconnu';
     }
 
-    // Fonctions de population des listes déroulantes
     function populateAllDropdowns() {
       populateVehicleDropdowns();
       populateBikeDropdowns();
@@ -2894,980 +4316,6 @@
           maintenanceSelect.appendChild(option);
         });
       }
-    }
-
-    // Fonctions d'édition
-    function editVehicle(id) {
-      const vehicle = vehicles.find(v => v.id === id);
-      if (!vehicle) return;
-      
-      document.getElementById('immatriculation').value = vehicle.immatriculation || '';
-      document.getElementById('marque').value = vehicle.marque || '';
-      document.getElementById('type').value = vehicle.type || '';
-      document.getElementById('date_circulation').value = vehicle.date_circulation || '';
-      document.getElementById('statut').value = vehicle.statut || 'en service';
-      document.getElementById('localisation').value = vehicle.localisation || 'en_circulation';
-      document.getElementById('chauffeur').value = vehicle.chauffeur || '';
-      document.getElementById('observations').value = vehicle.observations || '';
-      document.getElementById('departement').value = vehicle.departement || '';
-      document.getElementById('destination').value = vehicle.destination || '';
-      document.getElementById('motif_deplacement').value = vehicle.motif_deplacement || '';
-      document.getElementById('km_avant').value = vehicle.km_avant || '';
-      document.getElementById('km_apres').value = vehicle.km_apres || '';
-      document.getElementById('km_parcouru').value = vehicle.km_parcouru || '';
-      
-      document.getElementById('vehicule-form').setAttribute('data-edit-id', vehicle.id);
-      document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function viewVehicle(id) {
-      const vehicle = vehicles.find(v => v.id === id);
-      if (!vehicle) return;
-      
-      const fuelRecordsForVehicle = fuelRecords.filter(f => f.vehicle_id === id);
-      const maintenanceRecords = vehicleMaintenance.filter(m => m.vehicle_id === id);
-      
-      document.getElementById('modal-title').textContent = `Détails: ${vehicle.immatriculation || 'Véhicule'}`;
-      
-      let html = `
-        <div class="vehicle-details-grid">
-          <div class="detail-item">
-            <span class="detail-label">Marque/Modèle:</span>
-            <span class="detail-value">${vehicle.marque || 'Non spécifié'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Type:</span>
-            <span class="detail-value">${formatVehicleType(vehicle.type)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Mise en circulation:</span>
-            <span class="detail-value">${vehicle.date_circulation || 'Non spécifiée'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Statut:</span>
-            <span class="detail-value">${formatStatus(vehicle.statut)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Localisation:</span>
-            <span class="detail-value localisation-status ${vehicle.localisation}">${formatLocalisation(vehicle.localisation)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Facteur:</span>
-            <span class="detail-value">${vehicle.chauffeur || 'Non assigné'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Département:</span>
-            <span class="detail-value">${vehicle.departement || 'Non spécifié'}</span>
-          </div>
-          <div class="detail-item full-width">
-            <span class="detail-label">Observations:</span>
-            <span class="detail-value">${vehicle.observations || 'Aucune'}</span>
-          </div>
-        </div>
-      `;
-      
-      if (vehicle.destination) {
-        html += `
-          <h4 class="maintenance-title">Détails du Déplacement</h4>
-          <div class="maintenance-item">
-            <div class="maintenance-header">
-              <span class="maintenance-type">Destination: ${vehicle.destination}</span>
-              <span class="maintenance-date">Motif: ${vehicle.motif_deplacement || 'Non spécifié'}</span>
-            </div>
-            <div class="maintenance-cost">Kilométrage départ: ${vehicle.km_avant || 'N/A'} km</div>
-            <div class="maintenance-cost">Kilométrage arrivée: ${vehicle.km_apres || 'N/A'} km</div>
-            <div class="maintenance-cost">Distance parcourue: ${vehicle.km_parcouru || 'N/A'} km</div>
-          </div>
-        `;
-      }
-      
-      if (fuelRecordsForVehicle.length > 0) {
-        html += `
-          <h4 class="maintenance-title">Historique de ravitaillement</h4>
-          <div class="maintenance-list">
-            ${fuelRecordsForVehicle.map(fuel => `
-              <div class="maintenance-item">
-                <div class="maintenance-header">
-                  <span class="maintenance-type">${fuel.type || 'Carburant'}</span>
-                  <span class="maintenance-date">${formatDate(fuel.date)}</span>
-                </div>
-                <div class="maintenance-cost">Quantité: ${fuel.litres || 0}L</div>
-                <div class="maintenance-cost">Distance: ${fuel.km_parcouru || 0} km</div>
-                <div class="maintenance-cost">Consommation: ${fuel.consommation_100km || 0}L/100km</div>
-                <div class="maintenance-cost">Coût: ${formatCurrency(fuel.cout)}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
-      if (maintenanceRecords.length > 0) {
-        html += `
-          <h4 class="maintenance-title">Historique de maintenance</h4>
-          <div class="maintenance-list">
-            ${maintenanceRecords.map(maint => `
-              <div class="maintenance-item">
-                <div class="maintenance-header">
-                  <span class="maintenance-type">${formatMaintenanceType(maint.type)}</span>
-                  <span class="maintenance-date">${formatDate(maint.date)}</span>
-                </div>
-                <div class="maintenance-cost">Coût: ${formatCurrency(maint.cout)}</div>
-                <div class="maintenance-description">${maint.description || 'Aucune description'}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
-      document.getElementById('vehicle-details').innerHTML = html;
-      document.getElementById('vehicle-modal').classList.add('show');
-    }
-
-    async function deleteVehicle(id) {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.')) return;
-      
-      try {
-        // Supprimer les enregistrements associés
-        await db.deleteByIndex('vehicleFuel', 'vehicle_id', id);
-        await db.deleteByIndex('vehicleMaintenance', 'vehicle_id', id);
-        
-        // Supprimer le véhicule
-        await db.delete('vehicles', id);
-        
-        await loadVehicles();
-        await loadFuelRecords();
-        await loadVehicleMaintenance();
-        showToast('Véhicule supprimé avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
-        showToast('Erreur lors de la suppression', 'error');
-      }
-    }
-
-    function editBike(id) {
-      const bike = bikes.find(b => b.id === id);
-      if (!bike) return;
-      
-      document.getElementById('bike_immatriculation').value = bike.immatriculation || '';
-      document.getElementById('bike_marque').value = bike.marque || '';
-      document.getElementById('bike_type').value = bike.type || '';
-      document.getElementById('bike_date_circulation').value = bike.date_circulation || '';
-      document.getElementById('bike_statut').value = bike.statut || 'en service';
-      document.getElementById('bike_localisation').value = bike.localisation || 'en_circulation';
-      document.getElementById('bike_chauffeur').value = bike.chauffeur || '';
-      document.getElementById('bike_observations').value = bike.observations || '';
-      
-      document.getElementById('bike-form').setAttribute('data-edit-id', bike.id);
-      document.getElementById('bike-form-section')?.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function viewBike(id) {
-      const bike = bikes.find(b => b.id === id);
-      if (!bike) return;
-      
-      const maintenanceRecords = bikeMaintenance.filter(m => m.bike_id === id);
-      const fuelRecordsForBike = bikeFuelRecords.filter(f => f.bike_id === id);
-      
-      document.getElementById('bike-modal-title').textContent = `Détails: ${bike.immatriculation || 'Moto'}`;
-      
-      let html = `
-        <div class="bike-details-grid">
-          <div class="detail-item">
-            <span class="detail-label">Marque/Modèle:</span>
-            <span class="detail-value">${bike.marque || 'Non spécifié'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Type:</span>
-            <span class="detail-value">${formatBikeType(bike.type)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Mise en circulation:</span>
-            <span class="detail-value">${bike.date_circulation || 'Non spécifiée'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Statut:</span>
-            <span class="detail-value bike-status ${bike.statut?.replace(' ', '-')}">${formatStatus(bike.statut)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Localisation:</span>
-            <span class="detail-value localisation-status ${bike.localisation}">${formatLocalisation(bike.localisation)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Facteur:</span>
-            <span class="detail-value">${bike.chauffeur || 'Non assigné'}</span>
-          </div>
-          <div class="detail-item full-width">
-            <span class="detail-label">Observations:</span>
-            <span class="detail-value">${bike.observations || 'Aucune'}</span>
-          </div>
-        </div>
-      `;
-      
-      if (fuelRecordsForBike.length > 0) {
-        html += `
-          <h4 class="maintenance-title">Historique de ravitaillement</h4>
-          <div class="maintenance-list">
-            ${fuelRecordsForBike.map(fuel => `
-              <div class="maintenance-item">
-                <div class="maintenance-header">
-                  <span class="maintenance-type">${fuel.type || 'Carburant'}</span>
-                  <span class="maintenance-date">${formatDate(fuel.date)}</span>
-                </div>
-                <div class="maintenance-cost">Quantité: ${fuel.litres || 0}L</div>
-                <div class="maintenance-cost">Distance: ${fuel.km_parcouru || 0} km</div>
-                <div class="maintenance-cost">Consommation: ${fuel.consommation_100km || 0}L/100km</div>
-                <div class="maintenance-cost">Coût: ${formatCurrency(fuel.cout)}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
-      if (maintenanceRecords.length > 0) {
-        html += `
-          <h4 class="maintenance-title">Historique de maintenance</h4>
-          <div class="maintenance-list">
-            ${maintenanceRecords.map(maint => `
-              <div class="maintenance-item">
-                <div class="maintenance-header">
-                  <span class="maintenance-type">${formatMaintenanceType(maint.type)}</span>
-                  <span class="maintenance-date">${formatDate(maint.date)}</span>
-                </div>
-                <div class="maintenance-cost">Coût: ${formatCurrency(maint.cout)}</div>
-                <div class="maintenance-description">${maint.description || 'Aucune description'}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
-      document.getElementById('bike-details').innerHTML = html;
-      document.getElementById('bike-modal').classList.add('show');
-    }
-
-    async function deleteBike(id) {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer cette moto ? Cette action est irréversible.')) return;
-      
-      try {
-        await db.deleteByIndex('bikeFuel', 'bike_id', id);
-        await db.deleteByIndex('bikeMaintenance', 'bike_id', id);
-        await db.delete('bikes', id);
-        
-        await loadBikes();
-        await loadBikeFuelRecords();
-        await loadBikeMaintenance();
-        showToast('Moto supprimée avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
-        showToast('Erreur lors de la suppression', 'error');
-      }
-    }
-
-    function editGenerator(id) {
-      const generator = generators.find(g => g.id === id);
-      if (!generator) return;
-      
-      document.getElementById('generator_immatriculation').value = generator.immatriculation || '';
-      document.getElementById('generator_marque').value = generator.marque || '';
-      document.getElementById('generator_type').value = generator.type || '';
-      document.getElementById('generator_puissance').value = generator.puissance || '';
-      document.getElementById('generator_date_mise_service').value = generator.date_mise_service || '';
-      document.getElementById('generator_statut').value = generator.statut || 'en service';
-      document.getElementById('generator_localisation').value = generator.localisation || 'fixe';
-      document.getElementById('generator_observations').value = generator.observations || '';
-      
-      document.getElementById('generator-form').setAttribute('data-edit-id', generator.id);
-      document.getElementById('generator-form-section')?.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function viewGenerator(id) {
-      const generator = generators.find(g => g.id === id);
-      if (!generator) return;
-      
-      const fuelRecordsForGenerator = generatorFuelRecords.filter(f => f.generator_id === id);
-      const maintenanceRecords = generatorMaintenance.filter(m => m.generator_id === id);
-      
-      document.getElementById('generator-modal-title').textContent = `Détails: ${generator.immatriculation || 'Groupe'}`;
-      
-      let html = `
-        <div class="generator-details-grid">
-          <div class="detail-item">
-            <span class="detail-label">Marque/Modèle:</span>
-            <span class="detail-value">${generator.marque || 'Non spécifié'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Type:</span>
-            <span class="detail-value">${formatGeneratorType(generator.type)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Puissance:</span>
-            <span class="detail-value">${generator.puissance || 0} kVA</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Mise en service:</span>
-            <span class="detail-value">${generator.date_mise_service || 'Non spécifiée'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Statut:</span>
-            <span class="detail-value">${formatStatus(generator.statut)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Localisation:</span>
-            <span class="detail-value localisation-status ${generator.localisation}">${formatLocalisation(generator.localisation)}</span>
-          </div>
-          <div class="detail-item full-width">
-            <span class="detail-label">Observations:</span>
-            <span class="detail-value">${generator.observations || 'Aucune'}</span>
-          </div>
-        </div>
-      `;
-      
-      if (fuelRecordsForGenerator.length > 0) {
-        html += `
-          <h4 class="maintenance-title">Historique de ravitaillement</h4>
-          <div class="maintenance-list">
-            ${fuelRecordsForGenerator.map(fuel => `
-              <div class="maintenance-item">
-                <div class="maintenance-header">
-                  <span class="maintenance-date">${formatDate(fuel.date)}</span>
-                </div>
-                <div class="maintenance-cost">Marche: ${fuel.heure_marche || 'N/A'} - Arrêt: ${fuel.heure_arret || 'N/A'}</div>
-                <div class="maintenance-cost">Quantité ravitaillée: ${fuel.quantite_ravitailler || 0}L</div>
-                <div class="maintenance-cost">Temps fonctionnement: ${fuel.temps_fonctionnement || '00:00'}</div>
-                <div class="maintenance-cost">Consommation: ${fuel.quantite_consommee_heure || 0} L/h</div>
-                <div class="maintenance-cost">Coût: ${formatCurrency(fuel.cout)}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
-      if (maintenanceRecords.length > 0) {
-        html += `
-          <h4 class="maintenance-title">Historique de maintenance</h4>
-          <div class="maintenance-list">
-            ${maintenanceRecords.map(maint => `
-              <div class="maintenance-item">
-                <div class="maintenance-header">
-                  <span class="maintenance-type">${formatGeneratorMaintenanceType(maint.type)}</span>
-                  <span class="maintenance-date">${formatDate(maint.date)}</span>
-                </div>
-                <div class="maintenance-cost">Coût: ${formatCurrency(maint.cout)}</div>
-                <div class="maintenance-description">${maint.description || 'Aucune description'}</div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
-      document.getElementById('generator-details').innerHTML = html;
-      document.getElementById('generator-modal').classList.add('show');
-    }
-
-    async function deleteGenerator(id) {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer ce groupe électrogène ? Cette action est irréversible.')) return;
-      
-      try {
-        await db.deleteByIndex('generatorFuel', 'generator_id', id);
-        await db.deleteByIndex('generatorMaintenance', 'generator_id', id);
-        await db.delete('generators', id);
-        
-        await loadGenerators();
-        await loadGeneratorFuelRecords();
-        await loadGeneratorMaintenance();
-        showToast('Groupe électrogène supprimé avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de la suppression:', error);
-        showToast('Erreur lors de la suppression', 'error');
-      }
-    }
-
-    // Fonctions pour les formulaires
-    async function handleVehicleSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        immatriculation: document.getElementById('immatriculation').value,
-        marque: document.getElementById('marque').value,
-        type: document.getElementById('type').value,
-        date_circulation: document.getElementById('date_circulation').value,
-        statut: document.getElementById('statut').value,
-        localisation: document.getElementById('localisation').value,
-        chauffeur: document.getElementById('chauffeur').value,
-        observations: document.getElementById('observations').value,
-        departement: document.getElementById('departement').value,
-        destination: document.getElementById('destination').value,
-        motif_deplacement: document.getElementById('motif_deplacement').value,
-        km_avant: parseFloat(document.getElementById('km_avant').value) || 0,
-        km_apres: parseFloat(document.getElementById('km_apres').value) || 0,
-        km_parcouru: parseFloat(document.getElementById('km_parcouru').value) || 0,
-        created_at: new Date().toISOString()
-      };
-      
-      const vehicleId = e.target.getAttribute('data-edit-id');
-      
-      try {
-        if (vehicleId) {
-          await db.update('vehicles', parseInt(vehicleId), formData);
-          showToast('Véhicule modifié avec succès', 'success');
-        } else {
-          await db.add('vehicles', formData);
-          showToast('Véhicule ajouté avec succès', 'success');
-        }
-        
-        e.target.reset();
-        e.target.removeAttribute('data-edit-id');
-        await loadVehicles();
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleFuelSubmit(e) {
-      e.preventDefault();
-      
-      const kmDepart = parseFloat(document.getElementById('carburant_km_depart').value);
-      const kmArrivee = parseFloat(document.getElementById('carburant_km_arrivee').value);
-      const litres = parseFloat(document.getElementById('carburant_litres').value);
-      const prixUnitaire = parseFloat(document.getElementById('carburant_prix_unitaire').value);
-      
-      const formData = {
-        vehicle_id: parseInt(document.getElementById('carburant_vehicule').value),
-        date: document.getElementById('carburant_date').value,
-        km_depart: kmDepart,
-        km_arrivee: kmArrivee,
-        km_parcouru: kmArrivee - kmDepart,
-        litres: litres,
-        consommation_100km: document.getElementById('carburant_consommation_100km').value,
-        prix_unitaire: prixUnitaire,
-        cout: litres * prixUnitaire,
-        type: document.getElementById('carburant_type').value,
-        created_at: new Date().toISOString()
-      };
-      
-      try {
-        await db.add('vehicleFuel', formData);
-        e.target.reset();
-        await loadFuelRecords();
-        showToast('Ravitaillement enregistré avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleVehicleMaintenanceSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        vehicle_id: parseInt(document.getElementById('vehicle_maintenance_vehicule').value),
-        date: document.getElementById('vehicle_maintenance_date').value,
-        type: document.getElementById('vehicle_maintenance_type').value,
-        cout: parseFloat(document.getElementById('vehicle_maintenance_cout').value) || 0,
-        description: document.getElementById('vehicle_maintenance_description').value,
-        created_at: new Date().toISOString()
-      };
-      
-      try {
-        await db.add('vehicleMaintenance', formData);
-        e.target.reset();
-        await loadVehicleMaintenance();
-        showToast('Maintenance enregistrée avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleBikeSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        immatriculation: document.getElementById('bike_immatriculation').value,
-        marque: document.getElementById('bike_marque').value,
-        type: document.getElementById('bike_type').value,
-        date_circulation: document.getElementById('bike_date_circulation').value,
-        statut: document.getElementById('bike_statut').value,
-        localisation: document.getElementById('bike_localisation').value,
-        chauffeur: document.getElementById('bike_chauffeur').value,
-        observations: document.getElementById('bike_observations').value,
-        created_at: new Date().toISOString()
-      };
-      
-      const bikeId = e.target.getAttribute('data-edit-id');
-      
-      try {
-        if (bikeId) {
-          await db.update('bikes', parseInt(bikeId), formData);
-          showToast('Moto modifiée avec succès', 'success');
-        } else {
-          await db.add('bikes', formData);
-          showToast('Moto ajoutée avec succès', 'success');
-        }
-        
-        e.target.reset();
-        e.target.removeAttribute('data-edit-id');
-        await loadBikes();
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleBikeFuelSubmit(e) {
-      e.preventDefault();
-      
-      const kmDepart = parseFloat(document.getElementById('bike_carburant_km_depart').value);
-      const kmArrivee = parseFloat(document.getElementById('bike_carburant_km_arrivee').value);
-      const litres = parseFloat(document.getElementById('bike_carburant_litres').value);
-      const prixUnitaire = parseFloat(document.getElementById('bike_carburant_prix_unitaire').value);
-      
-      const formData = {
-        bike_id: parseInt(document.getElementById('bike_carburant_moto').value),
-        date: document.getElementById('bike_carburant_date').value,
-        km_depart: kmDepart,
-        km_arrivee: kmArrivee,
-        km_parcouru: kmArrivee - kmDepart,
-        litres: litres,
-        consommation_100km: document.getElementById('bike_carburant_consommation_100km').value,
-        prix_unitaire: prixUnitaire,
-        cout: litres * prixUnitaire,
-        type: document.getElementById('bike_carburant_type').value,
-        created_at: new Date().toISOString()
-      };
-      
-      try {
-        await db.add('bikeFuel', formData);
-        e.target.reset();
-        await loadBikeFuelRecords();
-        showToast('Ravitaillement enregistré avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleBikeMaintenanceSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        bike_id: parseInt(document.getElementById('maintenance_bike').value),
-        date: document.getElementById('maintenance_date').value,
-        type: document.getElementById('maintenance_type').value,
-        cout: parseFloat(document.getElementById('maintenance_cout').value) || 0,
-        description: document.getElementById('maintenance_description').value,
-        created_at: new Date().toISOString()
-      };
-      
-      try {
-        await db.add('bikeMaintenance', formData);
-        e.target.reset();
-        await loadBikeMaintenance();
-        showToast('Maintenance enregistrée avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleGeneratorSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        immatriculation: document.getElementById('generator_immatriculation').value,
-        marque: document.getElementById('generator_marque').value,
-        type: document.getElementById('generator_type').value,
-        puissance: parseFloat(document.getElementById('generator_puissance').value),
-        date_mise_service: document.getElementById('generator_date_mise_service').value,
-        statut: document.getElementById('generator_statut').value,
-        localisation: document.getElementById('generator_localisation').value,
-        observations: document.getElementById('generator_observations').value,
-        created_at: new Date().toISOString()
-      };
-      
-      const generatorId = e.target.getAttribute('data-edit-id');
-      
-      try {
-        if (generatorId) {
-          await db.update('generators', parseInt(generatorId), formData);
-          showToast('Groupe modifié avec succès', 'success');
-        } else {
-          await db.add('generators', formData);
-          showToast('Groupe ajouté avec succès', 'success');
-        }
-        
-        e.target.reset();
-        e.target.removeAttribute('data-edit-id');
-        await loadGenerators();
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleGeneratorFuelSubmit(e) {
-      e.preventDefault();
-      
-      const quantite = parseFloat(document.getElementById('generator_carburant_quantite_ravitailler').value);
-      const prixUnitaire = parseFloat(document.getElementById('generator_carburant_prix_unitaire').value);
-      const heureMarche = document.getElementById('generator_carburant_heure_marche').value;
-      const heureArret = document.getElementById('generator_carburant_heure_arret').value;
-      
-      const formData = {
-        generator_id: parseInt(document.getElementById('generator_carburant_groupe').value),
-        date: document.getElementById('generator_carburant_date').value,
-        quantite_ravitailler: quantite,
-        heure_marche: heureMarche,
-        heure_arret: heureArret,
-        temps_fonctionnement: calculateTempsFonctionnement(heureMarche, heureArret),
-        quantite_consommee_heure: parseFloat(document.getElementById('generator_carburant_quantite_consommee_heure').value),
-        prix_unitaire: prixUnitaire,
-        cout: quantite * prixUnitaire,
-        created_at: new Date().toISOString()
-      };
-      
-      try {
-        await db.add('generatorFuel', formData);
-        e.target.reset();
-        await loadGeneratorFuelRecords();
-        showToast('Ravitaillement enregistré avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    async function handleGeneratorMaintenanceSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        generator_id: parseInt(document.getElementById('generator_maintenance_groupe').value),
-        date: document.getElementById('generator_maintenance_date').value,
-        type: document.getElementById('generator_maintenance_type').value,
-        cout: parseFloat(document.getElementById('generator_maintenance_cout').value) || 0,
-        description: document.getElementById('generator_maintenance_description').value,
-        created_at: new Date().toISOString()
-      };
-      
-      try {
-        await db.add('generatorMaintenance', formData);
-        e.target.reset();
-        await loadGeneratorMaintenance();
-        showToast('Maintenance enregistrée avec succès', 'success');
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement:', error);
-        showToast('Erreur lors de l\'enregistrement', 'error');
-      }
-    }
-
-    function calculateTempsFonctionnement(heureMarche, heureArret) {
-      if (!heureMarche || !heureArret) return '00:00';
-      
-      const [h1, m1] = heureMarche.split(':').map(Number);
-      const [h2, m2] = heureArret.split(':').map(Number);
-      
-      let heures = h2 - h1;
-      let minutes = m2 - m1;
-      
-      if (minutes < 0) {
-        heures--;
-        minutes += 60;
-      }
-      
-      if (heures < 0) {
-        heures += 24;
-      }
-      
-      return `${heures.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    }
-
-    function updateTempsFonctionnement() {
-      const heureMarche = document.getElementById('generator_carburant_heure_marche')?.value;
-      const heureArret = document.getElementById('generator_carburant_heure_arret')?.value;
-      const tempsField = document.getElementById('generator_carburant_temps_fonctionnement');
-      
-      if (heureMarche && heureArret && tempsField) {
-        tempsField.value = calculateTempsFonctionnement(heureMarche, heureArret);
-      }
-    }
-
-    function calculateKilometrageParcouru() {
-      const kmAvant = parseFloat(document.getElementById('km_avant').value) || 0;
-      const kmApres = parseFloat(document.getElementById('km_apres').value) || 0;
-      const kmParcouru = document.getElementById('km_parcouru');
-      
-      if (kmParcouru) {
-        kmParcouru.value = kmApres > kmAvant ? kmApres - kmAvant : 0;
-      }
-    }
-
-    function calculateVehicleFuel() {
-      const kmDepart = parseFloat(document.getElementById('carburant_km_depart').value) || 0;
-      const kmArrivee = parseFloat(document.getElementById('carburant_km_arrivee').value) || 0;
-      const litres = parseFloat(document.getElementById('carburant_litres').value) || 0;
-      const prixUnitaire = parseFloat(document.getElementById('carburant_prix_unitaire').value) || 0;
-      
-      const kmParcouru = document.getElementById('carburant_km_parcouru');
-      const cout = document.getElementById('carburant_cout');
-      
-      if (kmParcouru) {
-        kmParcouru.value = kmArrivee > kmDepart ? kmArrivee - kmDepart : 0;
-      }
-      
-      if (cout) {
-        cout.value = (litres * prixUnitaire).toFixed(2);
-      }
-    }
-
-    function calculateBikeFuel() {
-      const kmDepart = parseFloat(document.getElementById('bike_carburant_km_depart').value) || 0;
-      const kmArrivee = parseFloat(document.getElementById('bike_carburant_km_arrivee').value) || 0;
-      const litres = parseFloat(document.getElementById('bike_carburant_litres').value) || 0;
-      const prixUnitaire = parseFloat(document.getElementById('bike_carburant_prix_unitaire').value) || 0;
-      
-      const kmParcouru = document.getElementById('bike_carburant_km_parcouru');
-      const cout = document.getElementById('bike_carburant_cout');
-      
-      if (kmParcouru) {
-        kmParcouru.value = kmArrivee > kmDepart ? kmArrivee - kmDepart : 0;
-      }
-      
-      if (cout) {
-        cout.value = (litres * prixUnitaire).toFixed(2);
-      }
-    }
-
-    function calculateGeneratorFuel() {
-      const quantite = parseFloat(document.getElementById('generator_carburant_quantite_ravitailler').value) || 0;
-      const prixUnitaire = parseFloat(document.getElementById('generator_carburant_prix_unitaire').value) || 0;
-      const cout = document.getElementById('generator_carburant_cout');
-      
-      if (cout) {
-        cout.value = (quantite * prixUnitaire).toFixed(2);
-      }
-    }
-
-    // Configuration des calculs automatiques
-    function setupAutoCalculations() {
-      const kmAvant = document.getElementById('km_avant');
-      const kmApres = document.getElementById('km_apres');
-      
-      if (kmAvant && kmApres) {
-        kmAvant.addEventListener('input', calculateKilometrageParcouru);
-        kmApres.addEventListener('input', calculateKilometrageParcouru);
-      }
-
-      // Carburant véhicules
-      const fuelFields = ['carburant_km_depart', 'carburant_km_arrivee', 'carburant_litres', 'carburant_prix_unitaire'];
-      fuelFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', calculateVehicleFuel);
-      });
-
-      // Carburant motos
-      const bikeFuelFields = ['bike_carburant_km_depart', 'bike_carburant_km_arrivee', 'bike_carburant_litres', 'bike_carburant_prix_unitaire'];
-      bikeFuelFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', calculateBikeFuel);
-      });
-
-      // Carburant groupes
-      const generatorFuelFields = ['generator_carburant_quantite_ravitailler', 'generator_carburant_prix_unitaire'];
-      generatorFuelFields.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', calculateGeneratorFuel);
-      });
-
-      // Temps de fonctionnement
-      const heureMarche = document.getElementById('generator_carburant_heure_marche');
-      const heureArret = document.getElementById('generator_carburant_heure_arret');
-      
-      if (heureMarche && heureArret) {
-        heureMarche.addEventListener('change', updateTempsFonctionnement);
-        heureArret.addEventListener('change', updateTempsFonctionnement);
-      }
-    }
-
-    // Fonctions d'export/import Excel
-    function exportToExcel() {
-      try {
-        const wb = XLSX.utils.book_new();
-
-        if (vehicles.length > 0) {
-          const vehicleData = vehicles.map(v => ({
-            'Immatriculation': v.immatriculation || '',
-            'Marque/Modèle': v.marque || '',
-            'Type': formatVehicleType(v.type),
-            'Date circulation': v.date_circulation || '',
-            'Statut': formatStatus(v.statut),
-            'Localisation': formatLocalisation(v.localisation),
-            'Facteur': v.chauffeur || '',
-            'Département': v.departement || '',
-            'Destination': v.destination || '',
-            'Motif déplacement': v.motif_deplacement || '',
-            'Km départ': v.km_avant || 0,
-            'Km arrivée': v.km_apres || 0,
-            'Km parcouru': v.km_parcouru || 0,
-            'Observations': v.observations || ''
-          }));
-          const ws = XLSX.utils.json_to_sheet(vehicleData);
-          XLSX.utils.book_append_sheet(wb, ws, "Véhicules");
-        }
-
-        if (bikes.length > 0) {
-          const bikeData = bikes.map(b => ({
-            'Immatriculation': b.immatriculation || '',
-            'Marque/Modèle': b.marque || '',
-            'Type': formatBikeType(b.type),
-            'Date circulation': b.date_circulation || '',
-            'Statut': formatStatus(b.statut),
-            'Localisation': formatLocalisation(b.localisation),
-            'Facteur': b.chauffeur || '',
-            'Observations': b.observations || ''
-          }));
-          const ws = XLSX.utils.json_to_sheet(bikeData);
-          XLSX.utils.book_append_sheet(wb, ws, "Motos");
-        }
-
-        if (generators.length > 0) {
-          const generatorData = generators.map(g => ({
-            'N° Inventaire': g.immatriculation || '',
-            'Marque/Modèle': g.marque || '',
-            'Type': formatGeneratorType(g.type),
-            'Puissance (kVA)': g.puissance || 0,
-            'Date mise service': g.date_mise_service || '',
-            'Statut': formatStatus(g.statut),
-            'Localisation': formatLocalisation(g.localisation),
-            'Observations': g.observations || ''
-          }));
-          const ws = XLSX.utils.json_to_sheet(generatorData);
-          XLSX.utils.book_append_sheet(wb, ws, "Groupes Électrogènes");
-        }
-
-        if (fuelRecords.length > 0) {
-          const fuelData = fuelRecords.map(f => ({
-            'Véhicule': getVehicleImmat(f.vehicle_id),
-            'Date': f.date || '',
-            'Km départ': f.km_depart || 0,
-            'Km arrivée': f.km_arrivee || 0,
-            'Km parcouru': f.km_parcouru || 0,
-            'Type': f.type || '',
-            'Quantité (L)': f.litres || 0,
-            'Consommation 100km': f.consommation_100km || 0,
-            'Prix unitaire': f.prix_unitaire || 0,
-            'Coût total': f.cout || 0
-          }));
-          const ws = XLSX.utils.json_to_sheet(fuelData);
-          XLSX.utils.book_append_sheet(wb, ws, "Carburant Véhicules");
-        }
-
-        if (bikeFuelRecords.length > 0) {
-          const fuelData = bikeFuelRecords.map(f => ({
-            'Moto': getBikeImmat(f.bike_id),
-            'Date': f.date || '',
-            'Km départ': f.km_depart || 0,
-            'Km arrivée': f.km_arrivee || 0,
-            'Km parcouru': f.km_parcouru || 0,
-            'Type': f.type || '',
-            'Quantité (L)': f.litres || 0,
-            'Consommation 100km': f.consommation_100km || 0,
-            'Prix unitaire': f.prix_unitaire || 0,
-            'Coût total': f.cout || 0
-          }));
-          const ws = XLSX.utils.json_to_sheet(fuelData);
-          XLSX.utils.book_append_sheet(wb, ws, "Carburant Motos");
-        }
-
-        if (generatorFuelRecords.length > 0) {
-          const fuelData = generatorFuelRecords.map(f => ({
-            'Groupe': getGeneratorImmat(f.generator_id),
-            'Date': f.date || '',
-            'Quantité ravitaillée (L)': f.quantite_ravitailler || 0,
-            'Heure marche': f.heure_marche || '',
-            'Heure arrêt': f.heure_arret || '',
-            'Temps fonctionnement': f.temps_fonctionnement || '',
-            'Consommation/h (L/h)': f.quantite_consommee_heure || 0,
-            'Prix unitaire': f.prix_unitaire || 0,
-            'Coût total': f.cout || 0
-          }));
-          const ws = XLSX.utils.json_to_sheet(fuelData);
-          XLSX.utils.book_append_sheet(wb, ws, "Carburant Groupes");
-        }
-
-        const date = new Date().toISOString().slice(0,10);
-        XLSX.writeFile(wb, `gestion_flotte_${date}.xlsx`);
-        showToast('Export Excel réussi', 'success');
-      } catch (error) {
-        console.error('Erreur lors de l\'export Excel:', error);
-        showToast('Erreur lors de l\'export Excel', 'error');
-      }
-    }
-
-    function importFromExcel() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.xlsx, .xls';
-      
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = async (e) => {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            
-            // Importer les données selon les onglets
-            if (workbook.SheetNames.includes('Véhicules')) {
-              const sheet = workbook.Sheets['Véhicules'];
-              const vehicles = XLSX.utils.sheet_to_json(sheet);
-              for (const vehicle of vehicles) {
-                await db.add('vehicles', {
-                  immatriculation: vehicle['Immatriculation'],
-                  marque: vehicle['Marque/Modèle'],
-                  type: vehicle['Type'],
-                  date_circulation: vehicle['Date circulation'],
-                  statut: vehicle['Statut'],
-                  localisation: vehicle['Localisation'],
-                  chauffeur: vehicle['Facteur'],
-                  departement: vehicle['Département'],
-                  destination: vehicle['Destination'],
-                  motif_deplacement: vehicle['Motif déplacement'],
-                  km_avant: vehicle['Km départ'],
-                  km_apres: vehicle['Km arrivée'],
-                  km_parcouru: vehicle['Km parcouru'],
-                  observations: vehicle['Observations'],
-                  created_at: new Date().toISOString()
-                });
-              }
-            }
-            
-            await loadAllData();
-            showToast('Import réussi', 'success');
-          } catch (error) {
-            console.error('Erreur lors de l\'import:', error);
-            showToast('Erreur lors de l\'import', 'error');
-          }
-        };
-        
-        reader.readAsArrayBuffer(file);
-      };
-      
-      input.click();
-    }
-
-    // Fonctions d'affichage des notifications
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      if (!toast) return;
-      
-      toast.textContent = message;
-      toast.className = `toast show ${type}`;
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
     }
 
     // Configuration des onglets
@@ -4053,6 +4501,594 @@
         document.getElementById('generator-form')?.reset();
         document.getElementById('generator-form')?.removeAttribute('data-edit-id');
       });
+    }
+
+    // Fonctions pour les formulaires (à implémenter)
+    async function handleFuelSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter', 'error');
+        return;
+      }
+      
+      const kmDepart = parseFloat(document.getElementById('carburant_km_depart').value) || 0;
+      const kmArrivee = parseFloat(document.getElementById('carburant_km_arrivee').value) || 0;
+      const litres = parseFloat(document.getElementById('carburant_litres').value) || 0;
+      const prixUnitaire = parseFloat(document.getElementById('carburant_prix_unitaire').value) || 0;
+      
+      const formData = {
+        vehicle_id: parseInt(document.getElementById('carburant_vehicule').value),
+        date: document.getElementById('carburant_date').value,
+        km_depart: kmDepart,
+        km_arrivee: kmArrivee,
+        km_parcouru: kmArrivee - kmDepart,
+        litres: litres,
+        consommation_100km: parseFloat(document.getElementById('carburant_consommation_100km').value) || 0,
+        prix_unitaire: prixUnitaire,
+        cout: litres * prixUnitaire,
+        type: document.getElementById('carburant_type').value,
+        created_at: new Date().toISOString()
+      };
+      
+      try {
+        await db.add('vehicleFuel', formData);
+        e.target.reset();
+        await loadAllData();
+        showToast('Ravitaillement enregistré avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    async function handleVehicleMaintenanceSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter', 'error');
+        return;
+      }
+      
+      const formData = {
+        vehicle_id: parseInt(document.getElementById('vehicle_maintenance_vehicule').value),
+        date: document.getElementById('vehicle_maintenance_date').value,
+        type: document.getElementById('vehicle_maintenance_type').value,
+        cout: parseFloat(document.getElementById('vehicle_maintenance_cout').value) || 0,
+        description: document.getElementById('vehicle_maintenance_description').value,
+        created_at: new Date().toISOString()
+      };
+      
+      try {
+        await db.add('vehicleMaintenance', formData);
+        e.target.reset();
+        await loadAllData();
+        showToast('Maintenance enregistrée avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    async function handleBikeSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter/modifier', 'error');
+        return;
+      }
+      
+      const formData = {
+        immatriculation: document.getElementById('bike_immatriculation').value,
+        marque: document.getElementById('bike_marque').value,
+        type: document.getElementById('bike_type').value,
+        date_circulation: document.getElementById('bike_date_circulation').value,
+        statut: document.getElementById('bike_statut').value,
+        localisation: document.getElementById('bike_localisation').value,
+        chauffeur: document.getElementById('bike_chauffeur').value,
+        observations: document.getElementById('bike_observations').value,
+        created_at: new Date().toISOString()
+      };
+      
+      const bikeId = e.target.getAttribute('data-edit-id');
+      
+      try {
+        if (bikeId) {
+          await db.update('bikes', parseInt(bikeId), formData);
+          showToast('Moto modifiée avec succès', 'success');
+        } else {
+          await db.add('bikes', formData);
+          showToast('Moto ajoutée avec succès', 'success');
+        }
+        
+        e.target.reset();
+        e.target.removeAttribute('data-edit-id');
+        await loadAllData();
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    async function handleBikeFuelSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter', 'error');
+        return;
+      }
+      
+      const kmDepart = parseFloat(document.getElementById('bike_carburant_km_depart').value) || 0;
+      const kmArrivee = parseFloat(document.getElementById('bike_carburant_km_arrivee').value) || 0;
+      const litres = parseFloat(document.getElementById('bike_carburant_litres').value) || 0;
+      const prixUnitaire = parseFloat(document.getElementById('bike_carburant_prix_unitaire').value) || 0;
+      
+      const formData = {
+        bike_id: parseInt(document.getElementById('bike_carburant_moto').value),
+        date: document.getElementById('bike_carburant_date').value,
+        km_depart: kmDepart,
+        km_arrivee: kmArrivee,
+        km_parcouru: kmArrivee - kmDepart,
+        litres: litres,
+        consommation_100km: parseFloat(document.getElementById('bike_carburant_consommation_100km').value) || 0,
+        prix_unitaire: prixUnitaire,
+        cout: litres * prixUnitaire,
+        type: document.getElementById('bike_carburant_type').value,
+        created_at: new Date().toISOString()
+      };
+      
+      try {
+        await db.add('bikeFuel', formData);
+        e.target.reset();
+        await loadAllData();
+        showToast('Ravitaillement enregistré avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    async function handleBikeMaintenanceSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter', 'error');
+        return;
+      }
+      
+      const formData = {
+        bike_id: parseInt(document.getElementById('maintenance_bike').value),
+        date: document.getElementById('maintenance_date').value,
+        type: document.getElementById('maintenance_type').value,
+        cout: parseFloat(document.getElementById('maintenance_cout').value) || 0,
+        description: document.getElementById('maintenance_description').value,
+        created_at: new Date().toISOString()
+      };
+      
+      try {
+        await db.add('bikeMaintenance', formData);
+        e.target.reset();
+        await loadAllData();
+        showToast('Maintenance enregistrée avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    async function handleGeneratorSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter/modifier', 'error');
+        return;
+      }
+      
+      const formData = {
+        immatriculation: document.getElementById('generator_immatriculation').value,
+        marque: document.getElementById('generator_marque').value,
+        type: document.getElementById('generator_type').value,
+        puissance: parseFloat(document.getElementById('generator_puissance').value) || 0,
+        date_mise_service: document.getElementById('generator_date_mise_service').value,
+        statut: document.getElementById('generator_statut').value,
+        localisation: document.getElementById('generator_localisation').value,
+        observations: document.getElementById('generator_observations').value,
+        created_at: new Date().toISOString()
+      };
+      
+      const generatorId = e.target.getAttribute('data-edit-id');
+      
+      try {
+        if (generatorId) {
+          await db.update('generators', parseInt(generatorId), formData);
+          showToast('Groupe modifié avec succès', 'success');
+        } else {
+          await db.add('generators', formData);
+          showToast('Groupe ajouté avec succès', 'success');
+        }
+        
+        e.target.reset();
+        e.target.removeAttribute('data-edit-id');
+        await loadAllData();
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    async function handleGeneratorFuelSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter', 'error');
+        return;
+      }
+      
+      const quantite = parseFloat(document.getElementById('generator_carburant_quantite_ravitailler').value) || 0;
+      const prixUnitaire = parseFloat(document.getElementById('generator_carburant_prix_unitaire').value) || 0;
+      const heureMarche = document.getElementById('generator_carburant_heure_marche').value;
+      const heureArret = document.getElementById('generator_carburant_heure_arret').value;
+      
+      const formData = {
+        generator_id: parseInt(document.getElementById('generator_carburant_groupe').value),
+        date: document.getElementById('generator_carburant_date').value,
+        quantite_ravitailler: quantite,
+        heure_marche: heureMarche,
+        heure_arret: heureArret,
+        temps_fonctionnement: calculateTempsFonctionnement(heureMarche, heureArret),
+        quantite_consommee_heure: parseFloat(document.getElementById('generator_carburant_quantite_consommee_heure').value) || 0,
+        prix_unitaire: prixUnitaire,
+        cout: quantite * prixUnitaire,
+        created_at: new Date().toISOString()
+      };
+      
+      try {
+        await db.add('generatorFuel', formData);
+        e.target.reset();
+        await loadAllData();
+        showToast('Ravitaillement enregistré avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    async function handleGeneratorMaintenanceSubmit(e) {
+      e.preventDefault();
+      if (!permissionManager.hasPermission('canCreate')) {
+        showToast('Vous n\'avez pas les droits pour ajouter', 'error');
+        return;
+      }
+      
+      const formData = {
+        generator_id: parseInt(document.getElementById('generator_maintenance_groupe').value),
+        date: document.getElementById('generator_maintenance_date').value,
+        type: document.getElementById('generator_maintenance_type').value,
+        cout: parseFloat(document.getElementById('generator_maintenance_cout').value) || 0,
+        description: document.getElementById('generator_maintenance_description').value,
+        created_at: new Date().toISOString()
+      };
+      
+      try {
+        await db.add('generatorMaintenance', formData);
+        e.target.reset();
+        await loadAllData();
+        showToast('Maintenance enregistrée avec succès', 'success');
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement:', error);
+        showToast('Erreur lors de l\'enregistrement', 'error');
+      }
+    }
+
+    // Fonctions de calcul automatique
+    function setupAutoCalculations() {
+      const kmAvant = document.getElementById('km_avant');
+      const kmApres = document.getElementById('km_apres');
+      
+      if (kmAvant && kmApres) {
+        kmAvant.addEventListener('input', calculateKilometrageParcouru);
+        kmApres.addEventListener('input', calculateKilometrageParcouru);
+      }
+
+      // Carburant véhicules
+      const fuelFields = ['carburant_km_depart', 'carburant_km_arrivee', 'carburant_litres', 'carburant_prix_unitaire'];
+      fuelFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', calculateVehicleFuel);
+      });
+
+      // Carburant motos
+      const bikeFuelFields = ['bike_carburant_km_depart', 'bike_carburant_km_arrivee', 'bike_carburant_litres', 'bike_carburant_prix_unitaire'];
+      bikeFuelFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', calculateBikeFuel);
+      });
+
+      // Carburant groupes
+      const generatorFuelFields = ['generator_carburant_quantite_ravitailler', 'generator_carburant_prix_unitaire'];
+      generatorFuelFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', calculateGeneratorFuel);
+      });
+
+      // Temps de fonctionnement
+      const heureMarche = document.getElementById('generator_carburant_heure_marche');
+      const heureArret = document.getElementById('generator_carburant_heure_arret');
+      
+      if (heureMarche && heureArret) {
+        heureMarche.addEventListener('change', updateTempsFonctionnement);
+        heureArret.addEventListener('change', updateTempsFonctionnement);
+      }
+    }
+
+    function calculateKilometrageParcouru() {
+      const kmAvant = parseFloat(document.getElementById('km_avant').value) || 0;
+      const kmApres = parseFloat(document.getElementById('km_apres').value) || 0;
+      const kmParcouru = document.getElementById('km_parcouru');
+      
+      if (kmParcouru) {
+        kmParcouru.value = kmApres > kmAvant ? kmApres - kmAvant : 0;
+      }
+    }
+
+    function calculateVehicleFuel() {
+      const kmDepart = parseFloat(document.getElementById('carburant_km_depart').value) || 0;
+      const kmArrivee = parseFloat(document.getElementById('carburant_km_arrivee').value) || 0;
+      const litres = parseFloat(document.getElementById('carburant_litres').value) || 0;
+      const prixUnitaire = parseFloat(document.getElementById('carburant_prix_unitaire').value) || 0;
+      
+      const kmParcouru = document.getElementById('carburant_km_parcouru');
+      const cout = document.getElementById('carburant_cout');
+      
+      if (kmParcouru) {
+        kmParcouru.value = kmArrivee > kmDepart ? kmArrivee - kmDepart : 0;
+      }
+      
+      if (cout) {
+        cout.value = (litres * prixUnitaire).toFixed(2);
+      }
+    }
+
+    function calculateBikeFuel() {
+      const kmDepart = parseFloat(document.getElementById('bike_carburant_km_depart').value) || 0;
+      const kmArrivee = parseFloat(document.getElementById('bike_carburant_km_arrivee').value) || 0;
+      const litres = parseFloat(document.getElementById('bike_carburant_litres').value) || 0;
+      const prixUnitaire = parseFloat(document.getElementById('bike_carburant_prix_unitaire').value) || 0;
+      
+      const kmParcouru = document.getElementById('bike_carburant_km_parcouru');
+      const cout = document.getElementById('bike_carburant_cout');
+      
+      if (kmParcouru) {
+        kmParcouru.value = kmArrivee > kmDepart ? kmArrivee - kmDepart : 0;
+      }
+      
+      if (cout) {
+        cout.value = (litres * prixUnitaire).toFixed(2);
+      }
+    }
+
+    function calculateGeneratorFuel() {
+      const quantite = parseFloat(document.getElementById('generator_carburant_quantite_ravitailler').value) || 0;
+      const prixUnitaire = parseFloat(document.getElementById('generator_carburant_prix_unitaire').value) || 0;
+      const cout = document.getElementById('generator_carburant_cout');
+      
+      if (cout) {
+        cout.value = (quantite * prixUnitaire).toFixed(2);
+      }
+    }
+
+    function updateTempsFonctionnement() {
+      const heureMarche = document.getElementById('generator_carburant_heure_marche')?.value;
+      const heureArret = document.getElementById('generator_carburant_heure_arret')?.value;
+      const tempsField = document.getElementById('generator_carburant_temps_fonctionnement');
+      
+      if (heureMarche && heureArret && tempsField) {
+        tempsField.value = calculateTempsFonctionnement(heureMarche, heureArret);
+      }
+    }
+
+    function calculateTempsFonctionnement(heureMarche, heureArret) {
+      if (!heureMarche || !heureArret) return '00:00';
+      
+      const [h1, m1] = heureMarche.split(':').map(Number);
+      const [h2, m2] = heureArret.split(':').map(Number);
+      
+      let heures = h2 - h1;
+      let minutes = m2 - m1;
+      
+      if (minutes < 0) {
+        heures--;
+        minutes += 60;
+      }
+      
+      if (heures < 0) {
+        heures += 24;
+      }
+      
+      return `${heures.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    // Fonctions d'export/import Excel
+    function exportToExcel() {
+      if (!permissionManager.hasPermission('canExport')) {
+        showToast('Vous n\'avez pas les droits pour exporter', 'error');
+        return;
+      }
+      
+      try {
+        const wb = XLSX.utils.book_new();
+
+        if (vehicles.length > 0) {
+          const vehicleData = vehicles.map(v => ({
+            'Immatriculation': v.immatriculation || '',
+            'Marque/Modèle': v.marque || '',
+            'Type': formatVehicleType(v.type),
+            'Date circulation': v.date_circulation || '',
+            'Statut': formatStatus(v.statut),
+            'Localisation': formatLocalisation(v.localisation),
+            'Chauffeur': v.chauffeur || '',
+            'Département': v.departement || '',
+            'Destination': v.destination || '',
+            'Motif déplacement': v.motif_deplacement || '',
+            'Km départ': v.km_avant || 0,
+            'Km arrivée': v.km_apres || 0,
+            'Km parcouru': v.km_parcouru || 0,
+            'Observations': v.observations || ''
+          }));
+          const ws = XLSX.utils.json_to_sheet(vehicleData);
+          XLSX.utils.book_append_sheet(wb, ws, "Véhicules");
+        }
+
+        if (bikes.length > 0) {
+          const bikeData = bikes.map(b => ({
+            'Immatriculation': b.immatriculation || '',
+            'Marque/Modèle': b.marque || '',
+            'Type': formatBikeType(b.type),
+            'Date circulation': b.date_circulation || '',
+            'Statut': formatStatus(b.statut),
+            'Localisation': formatLocalisation(b.localisation),
+            'Conducteur': b.chauffeur || '',
+            'Observations': b.observations || ''
+          }));
+          const ws = XLSX.utils.json_to_sheet(bikeData);
+          XLSX.utils.book_append_sheet(wb, ws, "Motos");
+        }
+
+        if (generators.length > 0) {
+          const generatorData = generators.map(g => ({
+            'N° Inventaire': g.immatriculation || '',
+            'Marque/Modèle': g.marque || '',
+            'Type': formatGeneratorType(g.type),
+            'Puissance (kVA)': g.puissance || 0,
+            'Date mise service': g.date_mise_service || '',
+            'Statut': formatStatus(g.statut),
+            'Localisation': formatLocalisation(g.localisation),
+            'Observations': g.observations || ''
+          }));
+          const ws = XLSX.utils.json_to_sheet(generatorData);
+          XLSX.utils.book_append_sheet(wb, ws, "Groupes Électrogènes");
+        }
+
+        if (fuelRecords.length > 0) {
+          const fuelData = fuelRecords.map(f => ({
+            'Véhicule': getVehicleImmat(f.vehicle_id),
+            'Date': f.date || '',
+            'Km départ': f.km_depart || 0,
+            'Km arrivée': f.km_arrivee || 0,
+            'Km parcouru': f.km_parcouru || 0,
+            'Type': f.type || '',
+            'Quantité (L)': f.litres || 0,
+            'Consommation 100km': f.consommation_100km || 0,
+            'Prix unitaire': f.prix_unitaire || 0,
+            'Coût total': f.cout || 0
+          }));
+          const ws = XLSX.utils.json_to_sheet(fuelData);
+          XLSX.utils.book_append_sheet(wb, ws, "Carburant Véhicules");
+        }
+
+        if (bikeFuelRecords.length > 0) {
+          const fuelData = bikeFuelRecords.map(f => ({
+            'Moto': getBikeImmat(f.bike_id),
+            'Date': f.date || '',
+            'Km départ': f.km_depart || 0,
+            'Km arrivée': f.km_arrivee || 0,
+            'Km parcouru': f.km_parcouru || 0,
+            'Type': f.type || '',
+            'Quantité (L)': f.litres || 0,
+            'Consommation 100km': f.consommation_100km || 0,
+            'Prix unitaire': f.prix_unitaire || 0,
+            'Coût total': f.cout || 0
+          }));
+          const ws = XLSX.utils.json_to_sheet(fuelData);
+          XLSX.utils.book_append_sheet(wb, ws, "Carburant Motos");
+        }
+
+        if (generatorFuelRecords.length > 0) {
+          const fuelData = generatorFuelRecords.map(f => ({
+            'Groupe': getGeneratorImmat(f.generator_id),
+            'Date': f.date || '',
+            'Quantité ravitaillée (L)': f.quantite_ravitailler || 0,
+            'Heure marche': f.heure_marche || '',
+            'Heure arrêt': f.heure_arret || '',
+            'Temps fonctionnement': f.temps_fonctionnement || '',
+            'Consommation/h (L/h)': f.quantite_consommee_heure || 0,
+            'Prix unitaire': f.prix_unitaire || 0,
+            'Coût total': f.cout || 0
+          }));
+          const ws = XLSX.utils.json_to_sheet(fuelData);
+          XLSX.utils.book_append_sheet(wb, ws, "Carburant Groupes");
+        }
+
+        const date = new Date().toISOString().slice(0,10);
+        XLSX.writeFile(wb, `gestion_flotte_${date}.xlsx`);
+        showToast('Export Excel réussi', 'success');
+      } catch (error) {
+        console.error('Erreur lors de l\'export Excel:', error);
+        showToast('Erreur lors de l\'export Excel', 'error');
+      }
+    }
+
+    function importFromExcel() {
+      if (!permissionManager.hasPermission('canImport')) {
+        showToast('Vous n\'avez pas les droits pour importer', 'error');
+        return;
+      }
+      
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.xlsx, .xls';
+      
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = async (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            if (workbook.SheetNames.includes('Véhicules')) {
+              const sheet = workbook.Sheets['Véhicules'];
+              const vehicles = XLSX.utils.sheet_to_json(sheet);
+              for (const vehicle of vehicles) {
+                await db.add('vehicles', {
+                  immatriculation: vehicle['Immatriculation'],
+                  marque: vehicle['Marque/Modèle'],
+                  type: vehicle['Type'],
+                  date_circulation: vehicle['Date circulation'],
+                  statut: vehicle['Statut'],
+                  localisation: vehicle['Localisation'],
+                  chauffeur: vehicle['Chauffeur'],
+                  departement: vehicle['Département'],
+                  destination: vehicle['Destination'],
+                  motif_deplacement: vehicle['Motif déplacement'],
+                  km_avant: vehicle['Km départ'],
+                  km_apres: vehicle['Km arrivée'],
+                  km_parcouru: vehicle['Km parcouru'],
+                  observations: vehicle['Observations'],
+                  created_at: new Date().toISOString()
+                });
+              }
+            }
+            
+            await loadAllData();
+            showToast('Import réussi', 'success');
+          } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            showToast('Erreur lors de l\'import', 'error');
+          }
+        };
+        
+        reader.readAsArrayBuffer(file);
+      };
+      
+      input.click();
+    }
+
+    // Fonction d'affichage des notifications (modifiée pour supporter une durée personnalisée)
+    function showToast(message, type = 'info', duration = 3000) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      
+      toast.textContent = message;
+      toast.className = `toast show ${type}`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, duration);
     }
 
     // Initialisation de l'application
